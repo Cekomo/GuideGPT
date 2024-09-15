@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+      "target": "esnext", // Targets the latest ECMAScript standard
+      "module": "esnext", // Uses ES modules
+      "jsx": "react", // Transpile JSX into React.createElement calls
+      "strict": true, // Enables strict type-checking options
+      "esModuleInterop": true, // Ensures correct default imports
+      "skipLibCheck": true, // Skips type checks on libraries
+      "forceConsistentCasingInFileNames": true, // Case-sensitive file imports
+      "moduleResolution": "node" // Use Node.js style module resolution
+    },
+    "include": ["src"], // Include all files in src
+    "exclude": ["node_modules"] // Exclude node_modules
+  }
+  
