@@ -24,18 +24,24 @@ export default MainPage;
 const ExpandableMessageBox: React.FC = () => {
     const [value, setValue] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-    // Adjust the height of the textarea based on its content
+    
+    // this works for a line having 48 characters
     useEffect(() => {
         if (textareaRef.current) {
+            const currentValue = textareaRef.current.value;
             textareaRef.current.style.height = 'auto';
-            textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+            if (currentValue.length <= 48) {
+                textareaRef.current.style.height = `${textareaRef.current.scrollHeight - 16}px`;
+            } else {
+                textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+            }
+
             if (textareaRef.current.scrollHeight > 250) {
                 textareaRef.current.style.height = '250px'
             }
         }
     }, [value]);
-
+    
     return (
         <textarea
             ref={textareaRef}
