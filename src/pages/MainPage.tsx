@@ -7,24 +7,33 @@ interface ExpandableMessageBoxProps {
     value: string;
     setValue: (value: string) => void;
     textareaRef: React.RefObject<HTMLTextAreaElement>; // Accept the ref as a prop
+    onSendMessage: (message: string) => void;
 }
 
 const MainPage: React.FC = () => {
     const [value, setValue] = useState(''); 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const [conversation, setConversation] = useState<{ [key: string]: string }> ({});
+    const [messageCount, setMessageCount] = useState(1);
 
     const HandleSendButton = () => {
         const currentValue = textareaRef.current?.value;
         const trimmedValue = currentValue?.trim();
-        console.log(textareaRef.current?.value)
         if (trimmedValue) {
-            const currentValue = textareaRef.current?.value;
-            console.log(trimmedValue);
+            const newKey = `u${messageCount}`;
+            setConversation(prevConversation => ({
+                ...prevConversation,
+                [newKey]: trimmedValue,
+            }));
+            setMessageCount(prevCount => prevCount + 1);
             setValue(''); 
             textareaRef.current!.value = '';
-            console.log(currentValue);
         }
     };
+
+    useEffect(() => {
+        console.log("Conversation updated:", conversation);
+    }, [conversation]); 
 
     return (
         <div id='main-page'>
@@ -34,6 +43,7 @@ const MainPage: React.FC = () => {
                         value={value}
                         setValue={setValue}
                         textareaRef={textareaRef}
+                        onSendMessage={HandleSendButton} 
                     />
                     <button id='input-button' onClick={HandleSendButton}>
                         <i className="fa-solid fa-paper-plane fa-lg"></i>
@@ -47,17 +57,16 @@ const MainPage: React.FC = () => {
 export default MainPage;
   
 
-const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setValue, textareaRef }) => {
+const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setValue, textareaRef, onSendMessage }) => {
     
     const HandleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        const currentValue = textareaRef.current?.value;
-        const trimmedValue = currentValue?.trim();
-
+        const trimmedValue = value.trim();
+        
         if (event.key === 'Enter' && (!trimmedValue || trimmedValue === '')) {
             event.preventDefault();
         } else if (event.key === 'Enter' && trimmedValue) {
-            console.log(currentValue);
-            setValue('');
+            onSendMessage(trimmedValue); // Call the function passed from parent
+            setValue(''); // Clear the input
             event.preventDefault();
         }    
     }
