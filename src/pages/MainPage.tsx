@@ -107,7 +107,5 @@ function CreateTextBubble(text: string): void {
     const textBubble = document.createElement("div");
     textBubble.classList.add('text-bubble');
     textBubble.textContent = text;
-    
-    // Append the textBubble to the container
     bubbleContainer.appendChild(textBubble);
 }

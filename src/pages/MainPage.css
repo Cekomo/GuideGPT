@@ -13,7 +13,7 @@ body, html {
 
 #chat-container {
     display: flex;
-    flex-direction: column;
+    /* flex-direction: column; */
     background-color: #27272a;
     border-radius: 12px;
     width: 60vh;
@@ -22,18 +22,21 @@ body, html {
       2px 2px 4px #022c22
     );
     justify-content: center;
-    align-items: center;
 }
 
-/* #bubble-container {
-
-} */
+#bubble-container {
+    flex-grow: 1; 
+    display: flex;
+    flex-direction: column-reverse; 
+    overflow-y: auto; 
+    margin-bottom: 11%;
+}
 
 #input-container {
     position: fixed;
     display: flex;
     width: 94%;
-    bottom: 2%; /* Stick to the bottom */
+    bottom: 2%; 
 }
 
 .expandable-textarea {
@@ -70,12 +73,10 @@ body, html {
     border-radius: 24px;
     background-color: #3f3f46;
     color: white;
-    padding-inline: 16px;
-    /* padding-block: 12px; */
+    padding: 8px 16px;
     font-size: 1.15em;
-    margin: 5% 5%;
-    margin-bottom: 4%;
-    align-items: flex-end;
+    margin: 0 16px 12px 0;
+    margin-left: auto;
 }
 
 #input-button:hover {
