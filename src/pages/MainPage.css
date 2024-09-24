@@ -1,13 +1,19 @@
+body, html {
+    height: 100%; /* Make sure the body takes full height */
+    margin: 0; /* Remove default margin */
+}
+
 #main-page {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100vh;
+    height: 100%;    
     width: 100vw;
 }
 
-#chat-block {
+#chat-container {
     display: flex;
+    flex-direction: column;
     background-color: #27272a;
     border-radius: 12px;
     width: 60vh;
@@ -16,15 +22,18 @@
       2px 2px 4px #022c22
     );
     justify-content: center;
+    align-items: center;
 }
 
-#input-block {
+/* #bubble-container {
+
+} */
+
+#input-container {
+    position: fixed;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 90%;
-    margin-top: auto; 
-    margin-bottom: 16px;
+    width: 94%;
+    bottom: 2%; /* Stick to the bottom */
 }
 
 .expandable-textarea {
@@ -48,10 +57,25 @@
     position: absolute;
     background-color: #71717a;
     border: 0px;
-    border-radius: 2em;
-    width: 36px;
-    height: 36px;
-    right: 7.5%;
+    border-radius: 1.8em;
+    width: 32px;
+    height: 32px;
+    right: 5.5%;
+    bottom: 2.8%;
+}
+
+.text-bubble {
+    max-width: 60%;
+    min-height: 4%;
+    border-radius: 24px;
+    background-color: #3f3f46;
+    color: white;
+    padding-inline: 16px;
+    /* padding-block: 12px; */
+    font-size: 1.15em;
+    margin: 5% 5%;
+    margin-bottom: 4%;
+    align-items: flex-end;
 }
 
 #input-button:hover {

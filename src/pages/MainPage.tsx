@@ -3,13 +3,6 @@ import './MainPage.css'
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 
-interface ExpandableMessageBoxProps {
-    value: string;
-    setValue: (value: string) => void;
-    textareaRef: React.RefObject<HTMLTextAreaElement>; // Accept the ref as a prop
-    onSendMessage: (message: string) => void;
-}
-
 const MainPage: React.FC = () => {
     const [value, setValue] = useState(''); 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -23,8 +16,9 @@ const MainPage: React.FC = () => {
             const newKey = `u${messageCount}`;
             setConversation(prevConversation => ({
                 ...prevConversation,
-                [newKey]: trimmedValue,
+                [newKey]: trimmedValue                
             }));
+            CreateTextBubble(trimmedValue);
             setMessageCount(prevCount => prevCount + 1);
             setValue(''); 
             textareaRef.current!.value = '';
@@ -37,25 +31,32 @@ const MainPage: React.FC = () => {
 
     return (
         <div id='main-page'>
-            <div id='chat-block'>
-                <div id='input-block'>
+            <div id='chat-container'>
+                <div id='bubble-container'></div>
+                <div id='input-container'>
                     <ExpandableMessageBox
                         value={value}
                         setValue={setValue}
                         textareaRef={textareaRef}
                         onSendMessage={HandleSendButton} 
                     />
-                    <button id='input-button' onClick={HandleSendButton}>
-                        <i className="fa-solid fa-paper-plane fa-lg"></i>
-                    </button>
                 </div>
+                <button id='input-button' onClick={HandleSendButton}>
+                    <i className="fa-solid fa-paper-plane fa-lg"></i>
+                </button>
             </div>  
         </div>
     );
 }
   
 export default MainPage;
-  
+
+interface ExpandableMessageBoxProps {
+    value: string;
+    setValue: (value: string) => void;
+    textareaRef: React.RefObject<HTMLTextAreaElement>; // Accept the ref as a prop
+    onSendMessage: (message: string) => void;
+}
 
 const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setValue, textareaRef, onSendMessage }) => {
     
@@ -65,13 +66,13 @@ const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setV
         if (event.key === 'Enter' && (!trimmedValue || trimmedValue === '')) {
             event.preventDefault();
         } else if (event.key === 'Enter' && trimmedValue) {
-            onSendMessage(trimmedValue); // Call the function passed from parent
+            // onSendMessage(trimmedValue);
+            CreateTextBubble(trimmedValue);
             setValue(''); // Clear the input
             event.preventDefault();
         }    
     }
 
-    
     // this works for a line having 48 characters
     useEffect(() => {
         if (textareaRef.current) {
@@ -100,3 +101,13 @@ const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setV
         />
     );
 };
+
+function CreateTextBubble(text: string): void {
+    const bubbleContainer = document.getElementById('bubble-container') as HTMLElement;
+    const textBubble = document.createElement("div");
+    textBubble.classList.add('text-bubble');
+    textBubble.textContent = text;
+    
+    // Append the textBubble to the container
+    bubbleContainer.appendChild(textBubble);
+}
