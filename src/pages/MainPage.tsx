@@ -25,10 +25,6 @@ const MainPage: React.FC = () => {
         }
     };
 
-    useEffect(() => {
-        console.log("Conversation updated:", conversation);
-    }, [conversation]); 
-
     return (
         <div id='main-page'>
             <div id='chat-container'>
@@ -107,5 +103,10 @@ function CreateTextBubble(text: string): void {
     const textBubble = document.createElement("div");
     textBubble.classList.add('text-bubble');
     textBubble.textContent = text;
-    bubbleContainer.appendChild(textBubble);
+    if (bubbleContainer.firstChild) {
+        bubbleContainer.insertBefore(textBubble, bubbleContainer.firstChild);
+    } else {
+        bubbleContainer.appendChild(textBubble);
+    }
+    bubbleContainer.scrollTop = bubbleContainer.scrollHeight;
 }
