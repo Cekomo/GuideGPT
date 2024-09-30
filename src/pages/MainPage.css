@@ -69,7 +69,6 @@ body, html {
 
 .text-bubble {
     max-width: 60%;
-    min-height: 4%;
     border-radius: 24px;
     background-color: #3f3f46;
     color: white;

@@ -59,14 +59,18 @@ const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setV
     const HandleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         const trimmedValue = value.trim();
         
-        if (event.key === 'Enter' && (!trimmedValue || trimmedValue === '')) {
-            event.preventDefault();
-        } else if (event.key === 'Enter' && trimmedValue) {
-            // onSendMessage(trimmedValue);
-            CreateTextBubble(trimmedValue);
-            setValue(''); // Clear the input
-            event.preventDefault();
-        }    
+        if (event.key === 'Enter') {
+            if (event.shiftKey) {
+                return;
+            } 
+            if (!trimmedValue || trimmedValue === '') {
+                event.preventDefault();
+            } else if (trimmedValue) {
+                CreateTextBubble(trimmedValue);
+                setValue('');
+                event.preventDefault();
+            }
+        } 
     }
 
     // this works for a line having 48 characters
