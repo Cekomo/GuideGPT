@@ -53,7 +53,7 @@ body, html {
     padding-inline: 16px;
     padding-block: 12px;
     padding-inline-end: 13%;
-    font-size: 1.15em;
+    font-size: 1.1em;
 }
 
 #input-button {
@@ -64,7 +64,7 @@ body, html {
     width: 32px;
     height: 32px;
     right: 5.5%;
-    bottom: 2.8%;
+    bottom: 2.5%;
 }
 
 .text-bubble {
@@ -73,7 +73,7 @@ body, html {
     background-color: #3f3f46;
     color: white;
     padding: 8px 16px;
-    font-size: 1.15em;
+    font-size: 1.1em;
     margin: 0 16px 8px 0;
     margin-left: auto;
 }
@@ -84,4 +84,5 @@ body, html {
 
 .fa-paper-plane {
     size: 16px;
+    margin-right: 3px;
 }

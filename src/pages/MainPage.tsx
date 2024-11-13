@@ -5,6 +5,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const MainPage: React.FC = () => {
     const [value, setValue] = useState(''); 
+    const [text, setText] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [conversation, setConversation] = useState<{ [key: string]: string }> ({});
     const [messageCount, setMessageCount] = useState(1);
@@ -19,6 +20,7 @@ const MainPage: React.FC = () => {
                 [newKey]: trimmedValue                
             }));
             CreateTextBubble(trimmedValue);
+            handleInsertChatBubble(trimmedValue);
             setMessageCount(prevCount => prevCount + 1);
             setValue(''); 
             textareaRef.current!.value = '';
@@ -34,7 +36,6 @@ const MainPage: React.FC = () => {
                         value={value}
                         setValue={setValue}
                         textareaRef={textareaRef}
-                        onSendMessage={HandleSendButton} 
                     />
                 </div>
                 <button id='input-button' onClick={HandleSendButton}>
@@ -51,10 +52,9 @@ interface ExpandableMessageBoxProps {
     value: string;
     setValue: (value: string) => void;
     textareaRef: React.RefObject<HTMLTextAreaElement>; // Accept the ref as a prop
-    onSendMessage: (message: string) => void;
 }
 
-const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setValue, textareaRef, onSendMessage }) => {
+const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setValue, textareaRef }) => {
     
     const HandleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         const trimmedValue = value.trim();
@@ -67,6 +67,7 @@ const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setV
                 event.preventDefault();
             } else if (trimmedValue) {
                 CreateTextBubble(trimmedValue);
+                handleInsertChatBubble(trimmedValue);
                 setValue('');
                 event.preventDefault();
             }
@@ -113,4 +114,36 @@ function CreateTextBubble(text: string): void {
         bubbleContainer.appendChild(textBubble);
     }
     bubbleContainer.scrollTop = bubbleContainer.scrollHeight;
+}
+
+const handleInsertChatBubble = async (text: string) =>  {
+    try {
+        const currentDate = new Date().toISOString();
+        const chat_id = 1;
+        const token_qty = Math.ceil(text.length / 4);
+        const response = await fetch('http://localhost:5001/insert-chat-bubble-record', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                chat_id: chat_id,  
+                bubble_id: null, 
+                content: text,
+                is_user_input: true,
+                creation_date: currentDate,
+                token_count: token_qty
+            })
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log('Data inserted:', result);
+        } else {
+            console.error('Failed to insert data:', response);
+        }
+    }
+    catch (error) {
+        console.error('Error:', error);
+    }
 }
