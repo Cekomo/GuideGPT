@@ -66,6 +66,7 @@ const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setV
             if (!trimmedValue || trimmedValue === '') {
                 event.preventDefault();
             } else if (trimmedValue) {
+                console.log('going in');
                 CreateTextBubble(trimmedValue);
                 handleInsertChatBubble(trimmedValue);
                 setValue('');
@@ -146,4 +147,9 @@ const handleInsertChatBubble = async (text: string) =>  {
     catch (error) {
         console.error('Error:', error);
     }
+}
+
+const showChatBubbles = async (chatId: number) => {
+    const response = await fetch(`/fetch-chat-bubbles?chat_id=${chatId}`);
+    const data = await response.json();
 }

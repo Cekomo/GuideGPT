@@ -68,6 +68,29 @@ app.post('/insert-chat-bubble-record', async (req, res) => {
     }
 })
 
+
+app.get('/conversation', async (req, res) => { // '1' will be changed as chatId
+    const data = req.body;
+    const chatId = 1; // will be fetched later dynamically
+    
+    try {
+        const textBubbleQuery = 'SELECT content FROM chat_bubble WHERE chat_id = $1'
+        const result = await pool.query(textBubbleQuery, [chatId]);
+        const messages = result.rows.map(row => row.content);
+
+        res.status(200).json({
+            chat_id: chatId,
+            messages: messages,
+        });
+    }
+    catch {
+        console.error('Error fetching chat bubbles:', error);
+        res.status(500).json({ error: 'An error occurred while fetching chat bubbles' });
+    }
+});
+
+
+
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
