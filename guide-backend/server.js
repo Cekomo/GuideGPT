@@ -1,36 +1,35 @@
 const express = require('express');
-const { Client } = require('pg');
+const mysql = require('mysql2/promise');
 const app = express();
 const bodyParser = require('body-parser');
 const port = 5001;
 const cors = require('cors');
 
-const client = new Client({
-    user: 'postgres',
-    host: 'localhost',
+const client = mysql.createPool({
+    user: 'root',
+    host: '127.0.0.1',
     database: 'GuideGPT',
     password: '3204965',
-    port: 5432,
+    port: 3306,
 });
 
-client.connect().catch(err => {
+client.getConnection().catch(err => {
     console.error('Failed to connect to the database:', err);
 });
 
 app.use(express.json());
-app.use(bodyParser.json());
 app.use(cors());
 
 async function getNextBubbleId (chatId) {
-    const lastBubbleQuery = 'SELECT MAX(bubble_id) FROM chat_bubble WHERE chat_id = $1';
+    const lastBubbleQuery = 'SELECT MAX(bubble_id) as maxBubbleId FROM chat_bubble WHERE chat_id = ?';
     try {
-        const lastBubbleResult = await client.query(lastBubbleQuery, [chatId]);
-        const lastBubbleId = lastBubbleResult.rows[0]?.max || 0;
+        const [rows] = await client.execute(lastBubbleQuery, [chatId]);
+        const lastBubbleId = rows[0]?.maxBubbleId || 0;
         return lastBubbleId + 1;
     }
     catch (error) {
         console.error('Error retrieving last bubble_id: ', error);
-        return 1;
+        throw error;
     }
 }
 
@@ -39,10 +38,11 @@ app.post('/insert-chat-bubble-record', async (req, res) => {
     const data = req.body;
     try {
         const lastBubbleId = await getNextBubbleId(data.chat_id);
+        console.log(data.chat_id);
         // chat_id = 1 until chat part in client is created
         const query = `
         INSERT INTO chat_bubble (chat_id, bubble_id, content, is_user_input, creation_date, token_count)
-        VALUES ($1, $2, $3, $4, $5, $6);
+        VALUES (?, ?, ?, ?, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'), ?);
         `;
         const values = [
             data.chat_id,
@@ -59,7 +59,7 @@ app.post('/insert-chat-bubble-record', async (req, res) => {
             data: data
         });
     }
-    catch {
+    catch (error) {
         console.error('Error during insert:', error);
         return res.status(500).json({
             message: 'Server error',
@@ -74,7 +74,7 @@ app.get('/conversation', async (req, res) => { // '1' will be changed as chatId
     const chatId = 1; // will be fetched later dynamically
     
     try {
-        const textBubbleQuery = 'SELECT content FROM chat_bubble WHERE chat_id = $1'
+        const textBubbleQuery = 'SELECT content FROM chat_bubble WHERE chat_id = ?'
         const result = await pool.query(textBubbleQuery, [chatId]);
         const messages = result.rows.map(row => row.content);
 

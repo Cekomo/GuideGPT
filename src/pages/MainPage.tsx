@@ -66,7 +66,6 @@ const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setV
             if (!trimmedValue || trimmedValue === '') {
                 event.preventDefault();
             } else if (trimmedValue) {
-                console.log('going in');
                 CreateTextBubble(trimmedValue);
                 handleInsertChatBubble(trimmedValue);
                 setValue('');
