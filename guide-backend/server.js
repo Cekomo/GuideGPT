@@ -53,7 +53,6 @@ app.post('/insert-chat-bubble-record', async (req, res) => {
             data.token_count
         ];
         const result = await client.query(query, values);
-        // console.log('Insert result:', result);
         res.status(201).json( {
             message: 'Data is inserted.',
             data: data
@@ -69,21 +68,20 @@ app.post('/insert-chat-bubble-record', async (req, res) => {
 })
 
 
-app.get('/conversation', async (req, res) => { // '1' will be changed as chatId
+app.get('/conversation/:chatId', async (req, res) => { // '1' will be changed as chatId
     const data = req.body;
     const chatId = 1; // will be fetched later dynamically
     
     try {
         const textBubbleQuery = 'SELECT content FROM chat_bubble WHERE chat_id = ?'
-        const result = await pool.query(textBubbleQuery, [chatId]);
-        const messages = result.rows.map(row => row.content);
-
+        const [rows] = pool.query(textBubbleQuery, [chatId]);
+        const messages = rows.map((row => row.content));
         res.status(200).json({
             chat_id: chatId,
             messages: messages,
         });
     }
-    catch {
+    catch (error) {
         console.error('Error fetching chat bubbles:', error);
         res.status(500).json({ error: 'An error occurred while fetching chat bubbles' });
     }

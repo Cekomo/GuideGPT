@@ -148,7 +148,46 @@ const handleInsertChatBubble = async (text: string) =>  {
     }
 }
 
+const chatConversation = ({ chatId }) => {
+    const [messages, setMessages] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchMessages = async () => {
+            try {
+                const response = await fetch(`http://localhost:5000/conversation/${chatId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch messages');
+                }
+                const data = await response.json();
+                setMessages(data.messages);
+                setLoading(false);
+            }
+            catch (error) {
+                setError(error.message); // why syntax error?
+                setLoading(false);
+            }
+        };
+        fetchMessages();
+    }, [chatId]);
+
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>Error: {error}</p>;
+
+    return (
+        <div>
+            <h1>Chat ID: {chatId}</h1>
+            <ul>
+                {messages.map((msg, index) => (
+                    <li key={index}>{msg}</li>
+                ))}
+            </ul>
+        </div>
+    );
+} 
+
 const showChatBubbles = async (chatId: number) => {
-    const response = await fetch(`/fetch-chat-bubbles?chat_id=${chatId}`);
+    const response = await fetch(`http://localhost:5000/conversation/${chatId}`);
     const data = await response.json();
 }
