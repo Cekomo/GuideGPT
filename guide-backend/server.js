@@ -38,7 +38,6 @@ app.post('/insert-chat-bubble-record', async (req, res) => {
     const data = req.body;
     try {
         const lastBubbleId = await getNextBubbleId(data.chat_id);
-        console.log(data.chat_id);
         // chat_id = 1 until chat part in client is created
         const query = `
         INSERT INTO chat_bubble (chat_id, bubble_id, content, is_user_input, creation_date, token_count)
@@ -68,25 +67,42 @@ app.post('/insert-chat-bubble-record', async (req, res) => {
 })
 
 
-app.get('/conversation/:chatId', async (req, res) => { // '1' will be changed as chatId
-    const data = req.body;
-    const chatId = 1; // will be fetched later dynamically
+// app.get('/:chatId', async (req, res) => { // '1' will be changed as chatId
+//     const data = req.body;
+//     const { chatId } = req.params;
     
+//     try {
+//         const textBubbleQuery = 'SELECT content FROM chat_bubble WHERE chat_id = ?'
+//         const [rows] = pool.query(textBubbleQuery, [chatId]);
+//         const messages = rows.map((row => row.content));
+//         res.status(200).json({
+//             chat_id: chatId,
+//             messages: messages,
+//         });
+//     }
+//     catch (error) {
+//         console.error('Error fetching chat bubbles:', error);
+//         res.status(500).json({ error: 'An error occurred while fetching chat bubbles' });
+//     }
+// });
+
+app.get('/:chatId', async (req, res) => {
+    const { chatId } = req.params; // Correctly destructure chatId from req.params
     try {
-        const textBubbleQuery = 'SELECT content FROM chat_bubble WHERE chat_id = ?'
-        const [rows] = pool.query(textBubbleQuery, [chatId]);
-        const messages = rows.map((row => row.content));
-        res.status(200).json({
-            chat_id: chatId,
-            messages: messages,
-        });
-    }
-    catch (error) {
-        console.error('Error fetching chat bubbles:', error);
-        res.status(500).json({ error: 'An error occurred while fetching chat bubbles' });
+        // Query to fetch messages based on chatId
+        const [rows] = await client.execute('SELECT * FROM chat_bubble WHERE chat_id = ?', [chatId]);
+
+        // Return the messages
+        if (rows.length > 0) {
+            res.json({ messages: rows });
+        } else {
+            res.status(404).json({ message: 'Chat not found' });
+        }
+    } catch (err) {
+        console.error('Error fetching chat bubbles:', err);
+        res.status(500).json({ error: 'Internal server error' });
     }
 });
-
 
 
 app.listen(port, () => {

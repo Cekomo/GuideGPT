@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './MainPage.css'
 import '@fortawesome/fontawesome-free/css/all.min.css';
+import { useParams, BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 
 const MainPage: React.FC = () => {
     const [value, setValue] = useState(''); 
-    const [text, setText] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [conversation, setConversation] = useState<{ [key: string]: string }> ({});
     const [messageCount, setMessageCount] = useState(1);
@@ -30,7 +30,13 @@ const MainPage: React.FC = () => {
     return (
         <div id='main-page'>
             <div id='chat-container'>
-                <div id='bubble-container'></div>
+                <div id='bubble-container'>
+                    <Router>
+                        <Routes>
+                            <Route path="/:chatId" element={<ChatConversation />} />
+                        </Routes>
+                    </Router>
+                </div>
                 <div id='input-container'>
                     <ExpandableMessageBox
                         value={value}
@@ -148,15 +154,16 @@ const handleInsertChatBubble = async (text: string) =>  {
     }
 }
 
-const chatConversation = ({ chatId }) => {
+const ChatConversation = () => {
+    const { chatId } = useParams<{ chatId: string }>();
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
+    
     useEffect(() => {
         const fetchMessages = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/conversation/${chatId}`);
+                const response = await fetch(`http://localhost:5001/${chatId}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch messages');
                 }
@@ -164,8 +171,8 @@ const chatConversation = ({ chatId }) => {
                 setMessages(data.messages);
                 setLoading(false);
             }
-            catch (error) {
-                setError(error.message); // why syntax error?
+            catch {
+                setError(error);
                 setLoading(false);
             }
         };
@@ -175,19 +182,18 @@ const chatConversation = ({ chatId }) => {
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
 
-    return (
-        <div>
-            <h1>Chat ID: {chatId}</h1>
-            <ul>
-                {messages.map((msg, index) => (
-                    <li key={index}>{msg}</li>
-                ))}
-            </ul>
-        </div>
-    );
+    <div>
+        <ul>
+        {messages.map((msg, index) => (
+                <li key={index}>
+                    <p><strong>Chat ID:</strong> {msg}</p>
+                    <p><strong>Bubble ID:</strong> {msg}</p>
+                    <p><strong>Content:</strong> {msg}</p>
+                    <p><strong>Is User Input:</strong> {msg ? 'Yes' : 'No'}</p>
+                    <p><strong>Created On:</strong> {msg}</p>
+                    <p><strong>Token Count:</strong> {msg}</p>
+                </li>
+            ))}
+        </ul>
+    </div>
 } 
-
-const showChatBubbles = async (chatId: number) => {
-    const response = await fetch(`http://localhost:5000/conversation/${chatId}`);
-    const data = await response.json();
-}
