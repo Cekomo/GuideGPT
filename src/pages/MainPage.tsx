@@ -33,7 +33,7 @@ const MainPage: React.FC = () => {
                 <div id='bubble-container'>
                     <Router>
                         <Routes>
-                            <Route path="/:chatId" element={<ChatConversation />} />
+                            <Route path="/:chatId" element={<ChatConversation  />} />
                         </Routes>
                     </Router>
                 </div>
@@ -154,9 +154,18 @@ const handleInsertChatBubble = async (text: string) =>  {
     }
 }
 
+interface Message {
+    chat_id: number;
+    bubble_id: number;
+    content: string;
+    is_user_input: boolean;
+    creation_date: string; // or Date if already converted
+    token_count: number;
+}
+
 const ChatConversation = () => {
     const { chatId } = useParams<{ chatId: string }>();
-    const [messages, setMessages] = useState([]);
+    const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     
@@ -179,21 +188,16 @@ const ChatConversation = () => {
         fetchMessages();
     }, [chatId]);
 
-    if (loading) return <p>Loading...</p>;
-    if (error) return <p>Error: {error}</p>;
 
-    <div>
-        <ul>
-        {messages.map((msg, index) => (
-                <li key={index}>
-                    <p><strong>Chat ID:</strong> {msg}</p>
-                    <p><strong>Bubble ID:</strong> {msg}</p>
-                    <p><strong>Content:</strong> {msg}</p>
-                    <p><strong>Is User Input:</strong> {msg ? 'Yes' : 'No'}</p>
-                    <p><strong>Created On:</strong> {msg}</p>
-                    <p><strong>Token Count:</strong> {msg}</p>
-                </li>
-            ))}
-        </ul>
-    </div>
+    return (
+        <div>
+            <ul>
+            {messages.map((msg, index) => (
+                    <div key={index}>
+                        <p><strong>{msg.bubble_id}</strong> {msg.content}</p>
+                    </div>
+                ))}
+            </ul>
+        </div>
+    );
 } 
