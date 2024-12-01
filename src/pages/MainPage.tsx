@@ -20,7 +20,7 @@ const MainPage: React.FC = () => {
                 [newKey]: trimmedValue                
             }));
             CreateTextBubble(trimmedValue);
-            handleInsertChatBubble(trimmedValue);
+            HandleInsertChatBubble(trimmedValue);
             setMessageCount(prevCount => prevCount + 1);
             setValue(''); 
             textareaRef.current!.value = '';
@@ -73,7 +73,7 @@ const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setV
                 event.preventDefault();
             } else if (trimmedValue) {
                 CreateTextBubble(trimmedValue);
-                handleInsertChatBubble(trimmedValue);
+                HandleInsertChatBubble(trimmedValue);
                 setValue('');
                 event.preventDefault();
             }
@@ -122,7 +122,7 @@ function CreateTextBubble(text: string): void {
     bubbleContainer.scrollTop = bubbleContainer.scrollHeight;
 }
 
-const handleInsertChatBubble = async (text: string) =>  {
+const HandleInsertChatBubble = async (text: string) =>  {
     try {
         const currentDate = new Date().toISOString();
         const chat_id = 1;
@@ -169,6 +169,8 @@ const ChatConversation = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     
+    const bubbleContainerRef = useRef<HTMLDivElement>(null);
+
     useEffect(() => {
         const fetchMessages = async () => {
             try {
@@ -185,19 +187,30 @@ const ChatConversation = () => {
                 setLoading(false);
             }
         };
+
         fetchMessages();
     }, [chatId]);
 
+    useEffect(() => {
+        if (bubbleContainerRef.current) {
+            bubbleContainerRef.current.scrollTop = bubbleContainerRef.current.scrollHeight;
+        }
+    }, [messages]);
+
+    const renderMessages = () => {
+        return messages.map((msg) => (
+            <div key={msg.bubble_id} className="text-bubble">
+                {msg.content}
+            </div>
+        ));
+    }
+
+    if (loading) return <p>Loading...</p>;
+    if (error) return <p>Error: {error}</p>;
 
     return (
-        <div>
-            <ul>
-            {messages.map((msg, index) => (
-                    <div key={index}>
-                        <p><strong>{msg.bubble_id}</strong> {msg.content}</p>
-                    </div>
-                ))}
-            </ul>
+        <div ref={bubbleContainerRef}>
+            { renderMessages() }
         </div>
     );
 } 
