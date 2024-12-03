@@ -13,6 +13,30 @@ body, html {
 
 #chat-container {
     display: flex;
+    justify-content: center;
+
+}
+
+#chat-board-list {
+    width: 25vh;
+    height: 90vh;
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+    background-color: #39393d;
+    margin-right: -12px;
+}
+
+#chat-board-list .chat-board-item {
+    border-radius: 6px;
+    background-color: #58585a;
+    margin-left: 8px;
+    padding-inline: 8px;
+    color: #bbbbbb;
+    font-weight: 700;
+}
+
+#chat-board {
+    display: flex;
     /* flex-direction: column; */
     background-color: #27272a;
     border-radius: 12px;

@@ -9,6 +9,7 @@ const MainPage: React.FC = () => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [conversation, setConversation] = useState<{ [key: string]: string }> ({});
     const [messageCount, setMessageCount] = useState(1);
+    // const [chatBoards, setChatBoards] = useState<{ id: number, title: string }[]>([]);
 
     const HandleSendButton = () => {
         const currentValue = textareaRef.current?.value;
@@ -27,27 +28,50 @@ const MainPage: React.FC = () => {
         }
     };
 
+    const items = [
+        { id: 1, name: 'PL/SQL Development' },
+        { id: 2, name: 'Vacation Plan', },
+        { id: 3, name: 'Oil saturation of egg', },
+      ];
+
+    // const AddChatBoard = (chatId: number, chatTitle: string) => {
+    //     const newBoard = {
+    //         id: chatId,
+    //         title: chatTitle
+    //     };
+    //     setChatBoards((prevChatBoards) => [...prevChatBoards, newBoard]);
+    // };
+
     return (
-        <div id='main-page'>
+        <div id='main-page'>    
             <div id='chat-container'>
-                <div id='bubble-container'>
-                    <Router>
-                        <Routes>
-                            <Route path="/:chatId" element={<ChatConversation  />} />
-                        </Routes>
-                    </Router>
+                <div id='chat-board-list'>
+                    {items.map((item) => (
+                        <div className='chat-board-item' key={item.id}>
+                            <p>{item.name}</p>
+                        </div>
+                    ))}
                 </div>
-                <div id='input-container'>
-                    <ExpandableMessageBox
-                        value={value}
-                        setValue={setValue}
-                        textareaRef={textareaRef}
-                    />
-                </div>
-                <button id='input-button' onClick={HandleSendButton}>
-                    <i className="fa-solid fa-paper-plane fa-lg"></i>
-                </button>
-            </div>  
+                <div id='chat-board'>
+                    <div id='bubble-container'>
+                        <Router>
+                            <Routes>
+                                <Route path="/:chatId" element={<ChatConversation  />} />
+                            </Routes>
+                        </Router>
+                    </div>
+                    <div id='input-container'>
+                        <ExpandableMessageBox
+                            value={value}
+                            setValue={setValue}
+                            textareaRef={textareaRef}
+                        />
+                    </div>
+                    <button id='input-button' onClick={HandleSendButton}>
+                        <i className="fa-solid fa-paper-plane fa-lg"></i>
+                    </button>
+                </div>  
+            </div>
         </div>
     );
 }
@@ -214,3 +238,4 @@ const ChatConversation = () => {
         </div>
     );
 } 
+
