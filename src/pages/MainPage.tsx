@@ -8,8 +8,32 @@ const MainPage: React.FC = () => {
     const [value, setValue] = useState(''); 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [conversation, setConversation] = useState<{ [key: string]: string }> ({});
+    const [boards, setBoards] = useState<ChatBoard[]>([]);
     const [messageCount, setMessageCount] = useState(1);
     // const [chatBoards, setChatBoards] = useState<{ id: number, title: string }[]>([]);
+
+    const { chatId } = useParams<{ chatId: string }>();
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+     useEffect(() => {
+        const fetchChatBoards = async () => {
+            try {
+                const response = await fetch(`http://localhost:5001/${chatId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch chatboards');
+                }
+                const data = await response.json();
+                setBoards(data.chatBoards || []);
+                setLoading(false);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'An unknown error occurred');
+                setLoading(false);
+            }
+        };
+
+        fetchChatBoards();
+    }, [chatId]);
 
     const HandleSendButton = () => {
         const currentValue = textareaRef.current?.value;
@@ -28,29 +52,11 @@ const MainPage: React.FC = () => {
         }
     };
 
-    const items = [
-        { id: 1, name: 'PL/SQL Development' },
-        { id: 2, name: 'Vacation Plan', },
-        { id: 3, name: 'Oil saturation of egg', },
-      ];
-
-    // const AddChatBoard = (chatId: number, chatTitle: string) => {
-    //     const newBoard = {
-    //         id: chatId,
-    //         title: chatTitle
-    //     };
-    //     setChatBoards((prevChatBoards) => [...prevChatBoards, newBoard]);
-    // };
-
     return (
         <div id='main-page'>    
             <div id='chat-container'>
                 <div id='chat-board-list'>
-                    {items.map((item) => (
-                        <div className='chat-board-item' key={item.id}>
-                            <p>{item.name}</p>
-                        </div>
-                    ))}
+                    
                 </div>
                 <div id='chat-board'>
                     <div id='bubble-container'>
@@ -187,9 +193,73 @@ interface Message {
     token_count: number;
 }
 
+interface ChatBoard {
+    user_id: string;
+    chat_id: number;
+    chat_title: string;
+    message_count: number;
+    creation_date: string;
+}
+
+const ChatBoards = () => {
+    const { chatId } = useParams<{ chatId: string }>();
+    const [boards, setBoards] = useState<ChatBoard[]>([]); // Default state as an empty array
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchMessages = async () => {
+            try {
+                const response = await fetch(`http://localhost:5001/${chatId}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch chatboards');
+                }
+                const data = await response.json();
+
+                // Ensure chatBoards exists in the response
+                if (data && data.chatBoards) {
+                    setBoards(data.chatBoards);
+                } else {
+                    throw new Error('Invalid response structure');
+                }
+
+                setLoading(false);
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'An unknown error occurred');
+                setLoading(false);
+            }
+        };
+
+        fetchMessages();
+    }, [chatId]);
+
+    const renderBoards = () => {
+        // Safeguard for undefined boards
+        if (!boards || boards.length === 0) {
+            return <p>No chat boards available.</p>;
+        }
+
+        return boards.map((brd) => (
+            <div key={brd.chat_id} className="chat-board-item">
+                {brd.chat_title}
+            </div>
+        ));
+    };
+
+    if (loading) return <p>Loading...</p>;
+    // if (error) return <p>Error: {error}</p>;
+
+    return (
+        <div>
+            {renderBoards()}
+        </div>
+    );
+};
+
 const ChatConversation = () => {
     const { chatId } = useParams<{ chatId: string }>();
     const [messages, setMessages] = useState<Message[]>([]);
+    
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     
