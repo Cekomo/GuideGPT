@@ -27,12 +27,13 @@ body, html {
 }
 
 #chat-board-list .chat-board-item {
-    border-radius: 6px;
+    border-radius: 6px 0px 0px 6px;
     background-color: #58585a;
-    margin-left: 8px;
+    padding: 4px;
     padding-inline: 8px;
     color: #bbbbbb;
     font-weight: 700;
+    margin: 12px;
 }
 
 #chat-board {

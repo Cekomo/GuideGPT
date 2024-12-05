@@ -68,17 +68,15 @@ app.post('/insert-chat-bubble-record', async (req, res) => {
 
 
 app.get('/:chatId', async (req, res) => {
-    const { userId, chatBoard, chatId } = req.params; // Correctly destructure chatId from req.params
+    const { chatId } = req.params;
     try {
-        // Query to fetch messages based on chatId
-        const [rows] = await client.execute('SELECT * FROM chat_bubble WHERE chat_id = ?', [chatId]);
-        const [chatBoardNames] = await client.execute('SELECT chat_id FROM chat_board WHERE user_id = ?', [userId]);
+        const [bubbles] = await client.execute('SELECT * FROM chat_bubble WHERE chat_id = ?', [chatId]);
+        const [boards] = await client.execute('SELECT * FROM chat_board WHERE chat_id = ?', [chatId]);
 
-        // Return the messages
-        if (rows.length > 0) {
+        if (bubbles.length > 0) {
             res.json({ 
-                messages: rows,
-                chatBoards: chatBoardNames
+                messages: bubbles,
+                chatBoards: boards
             });
         } else {
             res.status(404).json({ message: 'Chat not found' });
@@ -88,6 +86,8 @@ app.get('/:chatId', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+
 
 
 app.listen(port, () => {
