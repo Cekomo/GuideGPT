@@ -9,28 +9,20 @@ const MainPage: React.FC = () => {
     const { chatId } = useParams<{ chatId: string }>();
     
     const textareaRef = useRef<HTMLTextAreaElement>(null);
-    const [conversation, setConversation] = useState<{ [key: string]: string }> ({});
-    const [messageCount, setMessageCount] = useState(1);
+    const [messageCount, setMessageCount] = useState(0);
 
-    const HandleSendButton = () => {
+    const HandleSendButton = async () => {
         const currentValue = textareaRef.current?.value;
         const trimmedValue = currentValue?.trim();
-        if (trimmedValue) {
-            const newKey = `u${messageCount}`;
-            setConversation(prevConversation => ({
-                ...prevConversation,
-                [newKey]: trimmedValue                
-            }));
-            // CreateTextBubble(trimmedValue);
+        
+        if (trimmedValue) {    
+            setMessageCount((prevCount) => prevCount + 1);
+
             if (chatId) { HandleInsertChatBubble(trimmedValue, chatId); }
-            setMessageCount(prevCount => prevCount + 1);
             setValue(''); 
             textareaRef.current!.value = '';
         }
     };
-
-    useEffect(() => {      
-    }, [chatId]);
 
     return (
         <div id='main-page'>    
@@ -40,7 +32,7 @@ const MainPage: React.FC = () => {
                 </div>
                 <div id='chat-board'>
                     <div id='bubble-container'>
-                        {chatId && <ChatConversation chatId={chatId} />}
+                        {chatId && <ChatConversation chatId={chatId} messageCount={messageCount}/>}
                     </div>
                     <div id='input-container'>
                         <ExpandableMessageBox
@@ -79,7 +71,6 @@ const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setV
             if (!trimmedValue || trimmedValue === '') {
                 event.preventDefault();
             } else if (trimmedValue) {
-                // CreateTextBubble(trimmedValue);
                 if (chatId) { HandleInsertChatBubble(trimmedValue, chatId); }
                 setValue('');
                 event.preventDefault();
@@ -130,10 +121,8 @@ function CreateTextBubble(text: string): void {
 }
 
 const HandleInsertChatBubble = async (text: string, chatId: string) =>  {
-    console.log(chatId ? parseInt(chatId, 10) : null);
     try {
         const currentDate = new Date().toISOString();
-        // const { chatId } = useParams<{ chatId: string }>();
 
         const token_qty = Math.ceil(text.length / 4);
         const chatIdAsNumber = chatId ? parseInt(chatId, 10) : null;
@@ -175,20 +164,21 @@ interface Message {
 
 interface ChatConversationProps {
     chatId: string;
+    messageCount: number;
 }
 
-export const ChatConversation: React.FC<ChatConversationProps> = ({chatId}) => {
-    // const { chatId } = useParams<{ chatId: string }>();
+export const ChatConversation: React.FC<ChatConversationProps> = ({chatId, messageCount}) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [chatBoards, setChatBoards] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    
+
     const bubbleContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const fetchMessages = async () => {
             try {
+                console.log('messagecount ' + messageCount);
                 const response = await fetch(`http://localhost:5001/${chatId}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch messages');
@@ -204,7 +194,7 @@ export const ChatConversation: React.FC<ChatConversationProps> = ({chatId}) => {
             }
         };
         fetchMessages();
-    }, [chatId]);
+    }, [chatId, messageCount]);
 
     useEffect(() => {
         if (bubbleContainerRef.current) {
@@ -229,7 +219,6 @@ export const ChatConversation: React.FC<ChatConversationProps> = ({chatId}) => {
                 { renderMessages() }
             </div>
         </div>
-        
     );
 } 
 
