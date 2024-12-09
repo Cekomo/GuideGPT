@@ -38,7 +38,6 @@ app.post('/insert-chat-bubble-record', async (req, res) => {
     const data = req.body;
     try {
         const lastBubbleId = await getNextBubbleId(data.chat_id);
-        // chat_id = 1 until chat part in client is created
         const query = `
         INSERT INTO chat_bubble (chat_id, bubble_id, content, is_user_input, creation_date, token_count)
         VALUES (?, ?, ?, ?, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'), ?);
@@ -52,6 +51,7 @@ app.post('/insert-chat-bubble-record', async (req, res) => {
             data.token_count
         ];
         const result = await client.query(query, values);
+        // console.log(result);
         res.status(201).json( {
             message: 'Data is inserted.',
             data: data
@@ -66,21 +66,37 @@ app.post('/insert-chat-bubble-record', async (req, res) => {
     }
 })
 
+app.get('/', async(req, res) => {
+    try {
+        const [boards] = await client.execute('SELECT * FROM chat_board'); // user_id will be added
+        if (0 || boards.length > 0) {
+            res.json({
+                chatBoards: boards
+            });
+        }
+        else {
+            res.status(404).json({ message: 'Chat item not found'})
+        }
+    }
+    catch (err) {
+        console.error('Error fetching chat bubbles:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+})
 
 app.get('/:chatId', async (req, res) => {
     const { chatId } = req.params;
     try {
-        const [bubbles] = await client.execute('SELECT * FROM chat_bubble WHERE chat_id = ?', [chatId]);
-        const [boards] = await client.execute('SELECT * FROM chat_board WHERE chat_id = ?', [chatId]);
-
+        const [bubbles] = await client.execute('SELECT * FROM chat_bubble WHERE chat_id = ?', [chatId]); // user_id will be added
+        bubbles
         if (bubbles.length > 0) {
             res.json({ 
-                messages: bubbles,
-                chatBoards: boards
+                messages: bubbles
             });
         } else {
-            res.status(404).json({ message: 'Chat not found' });
+            res.status(404).json({ message: 'Chat bubble not found.' });
         }
+        
     } catch (err) {
         console.error('Error fetching chat bubbles:', err);
         res.status(500).json({ error: 'Internal server error' });

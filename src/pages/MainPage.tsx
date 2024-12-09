@@ -9,6 +9,7 @@ const MainPage: React.FC = () => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [conversation, setConversation] = useState<{ [key: string]: string }> ({});
     const [messageCount, setMessageCount] = useState(1);
+    const { chatId } = useParams<{ chatId: string }>();
 
     const HandleSendButton = () => {
         const currentValue = textareaRef.current?.value;
@@ -20,20 +21,25 @@ const MainPage: React.FC = () => {
                 [newKey]: trimmedValue                
             }));
             CreateTextBubble(trimmedValue);
-            HandleInsertChatBubble(trimmedValue);
+            if (chatId) { HandleInsertChatBubble(trimmedValue, chatId); }
+            // console.log(chatId);
             setMessageCount(prevCount => prevCount + 1);
             setValue(''); 
             textareaRef.current!.value = '';
         }
     };
 
+    useEffect(() => {
+        
+    }, [chatId]);
+
     return (
         <div id='main-page'>    
             <div id='chat-container'>
                 <div id='chat-board-list'>
-                    <Router>
+                    <Router> 
                         <Routes>
-                            <Route path="/:chatId" element={<ChatBoards />} />
+                            <Route path="/conversation/*" element={<ChatBoards />} />
                         </Routes>
                     </Router>
                 </div>
@@ -41,15 +47,17 @@ const MainPage: React.FC = () => {
                     <div id='bubble-container'>
                         <Router>
                             <Routes>
-                                <Route path="/:chatId" element={<ChatConversation  />} />
+                                <Route path="/conversation/:chatId" element={<ChatConversation />} />
                             </Routes>
                         </Router>
+                        
                     </div>
                     <div id='input-container'>
                         <ExpandableMessageBox
                             value={value}
                             setValue={setValue}
                             textareaRef={textareaRef}
+                            chatId={chatId}
                         />
                     </div>
                     <button id='input-button' onClick={HandleSendButton}>
@@ -66,10 +74,11 @@ export default MainPage;
 interface ExpandableMessageBoxProps {
     value: string;
     setValue: (value: string) => void;
-    textareaRef: React.RefObject<HTMLTextAreaElement>; // Accept the ref as a prop
+    textareaRef: React.RefObject<HTMLTextAreaElement>;
+    chatId: string | undefined;
 }
 
-const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setValue, textareaRef }) => {
+const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setValue, textareaRef, chatId }) => {
     
     const HandleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         const trimmedValue = value.trim();
@@ -82,7 +91,7 @@ const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setV
                 event.preventDefault();
             } else if (trimmedValue) {
                 CreateTextBubble(trimmedValue);
-                HandleInsertChatBubble(trimmedValue);
+                if (chatId) { HandleInsertChatBubble(trimmedValue, chatId); }
                 setValue('');
                 event.preventDefault();
             }
@@ -131,19 +140,21 @@ function CreateTextBubble(text: string): void {
     bubbleContainer.scrollTop = bubbleContainer.scrollHeight;
 }
 
-const HandleInsertChatBubble = async (text: string) =>  {
+const HandleInsertChatBubble = async (text: string, chatId: string) =>  {
     try {
         const currentDate = new Date().toISOString();
-        const chat_id = 1;
+        // const { chatId } = useParams<{ chatId: string }>();
+
         const token_qty = Math.ceil(text.length / 4);
+        const chatIdAsNumber = chatId ? parseInt(chatId, 10) : null;
         const response = await fetch('http://localhost:5001/insert-chat-bubble-record', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                chat_id: chat_id,  
-                bubble_id: null, 
+                chat_id: chatIdAsNumber,  
+                bubble_id: null,  
                 content: text,
                 is_user_input: true,
                 creation_date: currentDate,
@@ -172,15 +183,15 @@ interface Message {
     token_count: number;
 }
 
-interface ChatBoard {
-    user_id: string;
-    chat_id: number;
-    chat_title: string;
-    message_count: number;
-    creation_date: string;
-}
+// interface ChatBoard {
+//     user_id: string;
+//     chat_id: number;
+//     chat_title: string;
+//     message_count: number;
+//     creation_date: string;
+// }
 
-const ChatConversation = () => {
+export const ChatConversation = () => {
     const { chatId } = useParams<{ chatId: string }>();
     const [messages, setMessages] = useState<Message[]>([]);
     const [chatBoards, setChatBoards] = useState([]);
@@ -237,16 +248,17 @@ const ChatConversation = () => {
     );
 } 
 
-const ChatBoards = () => {
-    const { chatId } = useParams<{ chatId: string }>();
+export const ChatBoards = () => {
     const [boards, setBoards] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    // const { chatId } = useParams<{ chatId: string }>();
 
     useEffect(() => {
         const fetchChatBoards = async () => {
             try {
-                const response = await fetch(`http://localhost:5001/${chatId}`);
+                // const response = await fetch(`http://localhost:5001/${chatId}`);
+                const response = await fetch(`http://localhost:5001/`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch chat boards');
                 }
@@ -261,7 +273,7 @@ const ChatBoards = () => {
         };
 
         fetchChatBoards();
-    }, [chatId]);
+    }, []);
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
