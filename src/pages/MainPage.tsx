@@ -1,15 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './MainPage.css'
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import { useParams, BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useParams, BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 
 
 const MainPage: React.FC = () => {
     const [value, setValue] = useState(''); 
+    
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [conversation, setConversation] = useState<{ [key: string]: string }> ({});
     const [messageCount, setMessageCount] = useState(1);
-    const { chatId } = useParams<{ chatId: string }>();
+    const chatId = window.location.pathname.split('/').pop();
 
     const HandleSendButton = () => {
         const currentValue = textareaRef.current?.value;
@@ -22,7 +23,6 @@ const MainPage: React.FC = () => {
             }));
             CreateTextBubble(trimmedValue);
             if (chatId) { HandleInsertChatBubble(trimmedValue, chatId); }
-            // console.log(chatId);
             setMessageCount(prevCount => prevCount + 1);
             setValue(''); 
             textareaRef.current!.value = '';
@@ -141,6 +141,7 @@ function CreateTextBubble(text: string): void {
 }
 
 const HandleInsertChatBubble = async (text: string, chatId: string) =>  {
+    console.log(chatId ? parseInt(chatId, 10) : null);
     try {
         const currentDate = new Date().toISOString();
         // const { chatId } = useParams<{ chatId: string }>();
@@ -183,14 +184,6 @@ interface Message {
     token_count: number;
 }
 
-// interface ChatBoard {
-//     user_id: string;
-//     chat_id: number;
-//     chat_title: string;
-//     message_count: number;
-//     creation_date: string;
-// }
-
 export const ChatConversation = () => {
     const { chatId } = useParams<{ chatId: string }>();
     const [messages, setMessages] = useState<Message[]>([]);
@@ -217,7 +210,7 @@ export const ChatConversation = () => {
                 setLoading(false);
             }
         };
-
+        console.log("Chat ID has changed:", chatId);
         fetchMessages();
     }, [chatId]);
 
@@ -252,12 +245,11 @@ export const ChatBoards = () => {
     const [boards, setBoards] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    // const { chatId } = useParams<{ chatId: string }>();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchChatBoards = async () => {
             try {
-                // const response = await fetch(`http://localhost:5001/${chatId}`);
                 const response = await fetch(`http://localhost:5001/`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch chat boards');
@@ -278,12 +270,19 @@ export const ChatBoards = () => {
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
 
+    const handleNavigation = (chatId: number) => {
+        navigate(`/conversation/${chatId}`); 
+    };
+
     return (
         <div >
             {boards.map((board) => (
-                <div key={board.chat_id} className="chat-board-item">
+                <button 
+                    key={board.chat_id} 
+                    className="chat-board-item"
+                    onClick={() => handleNavigation(board.chat_id)}>
                     {board.chat_title}
-                </div>
+                </button>
             ))}
         </div>
     );

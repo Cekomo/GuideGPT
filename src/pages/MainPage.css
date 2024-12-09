@@ -14,7 +14,6 @@ body, html {
 #chat-container {
     display: flex;
     justify-content: center;
-
 }
 
 #chat-board-list {
@@ -28,13 +27,30 @@ body, html {
 
 #chat-board-list .chat-board-item {
     border-radius: 6px 0px 0px 6px;
+    width: 24vh;
+    height: 3vh;
     background-color: #58585a;
-    padding: 4px;
     padding-inline: 8px;
     color: #bbbbbb;
     font-weight: 700;
-    margin: 12px;
+    margin: 12px 0px 0px 12px;
+    border: none;
+    text-align: left;
 }
+
+#chat-board-list .chat-board-item:hover {
+    transform: translateY(-1px);
+}
+  
+#chat-board-list .chat-board-item:active {
+    background-color: #4b4b4d;
+    transform: translateY(0);
+}
+  
+/* .chat-board-item:focus {
+    
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5); 
+} */
 
 #chat-board {
     display: flex;
