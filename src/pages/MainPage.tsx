@@ -6,11 +6,11 @@ import { useParams, BrowserRouter as Router, Routes, Route, useNavigate } from '
 
 const MainPage: React.FC = () => {
     const [value, setValue] = useState(''); 
+    const { chatId } = useParams<{ chatId: string }>();
     
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [conversation, setConversation] = useState<{ [key: string]: string }> ({});
     const [messageCount, setMessageCount] = useState(1);
-    const chatId = window.location.pathname.split('/').pop();
 
     const HandleSendButton = () => {
         const currentValue = textareaRef.current?.value;
@@ -21,7 +21,7 @@ const MainPage: React.FC = () => {
                 ...prevConversation,
                 [newKey]: trimmedValue                
             }));
-            CreateTextBubble(trimmedValue);
+            // CreateTextBubble(trimmedValue);
             if (chatId) { HandleInsertChatBubble(trimmedValue, chatId); }
             setMessageCount(prevCount => prevCount + 1);
             setValue(''); 
@@ -29,28 +29,18 @@ const MainPage: React.FC = () => {
         }
     };
 
-    useEffect(() => {
-        
+    useEffect(() => {      
     }, [chatId]);
 
     return (
         <div id='main-page'>    
             <div id='chat-container'>
                 <div id='chat-board-list'>
-                    <Router> 
-                        <Routes>
-                            <Route path="/conversation/*" element={<ChatBoards />} />
-                        </Routes>
-                    </Router>
+                    <ChatBoards/>
                 </div>
                 <div id='chat-board'>
                     <div id='bubble-container'>
-                        <Router>
-                            <Routes>
-                                <Route path="/conversation/:chatId" element={<ChatConversation />} />
-                            </Routes>
-                        </Router>
-                        
+                        {chatId && <ChatConversation chatId={chatId} />}
                     </div>
                     <div id='input-container'>
                         <ExpandableMessageBox
@@ -79,7 +69,6 @@ interface ExpandableMessageBoxProps {
 }
 
 const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setValue, textareaRef, chatId }) => {
-    
     const HandleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         const trimmedValue = value.trim();
         
@@ -90,7 +79,7 @@ const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setV
             if (!trimmedValue || trimmedValue === '') {
                 event.preventDefault();
             } else if (trimmedValue) {
-                CreateTextBubble(trimmedValue);
+                // CreateTextBubble(trimmedValue);
                 if (chatId) { HandleInsertChatBubble(trimmedValue, chatId); }
                 setValue('');
                 event.preventDefault();
@@ -184,8 +173,12 @@ interface Message {
     token_count: number;
 }
 
-export const ChatConversation = () => {
-    const { chatId } = useParams<{ chatId: string }>();
+interface ChatConversationProps {
+    chatId: string;
+}
+
+export const ChatConversation: React.FC<ChatConversationProps> = ({chatId}) => {
+    // const { chatId } = useParams<{ chatId: string }>();
     const [messages, setMessages] = useState<Message[]>([]);
     const [chatBoards, setChatBoards] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -210,7 +203,6 @@ export const ChatConversation = () => {
                 setLoading(false);
             }
         };
-        console.log("Chat ID has changed:", chatId);
         fetchMessages();
     }, [chatId]);
 
