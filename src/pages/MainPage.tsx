@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './MainPage.css'
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import { useParams, BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 
 const MainPage: React.FC = () => {
@@ -11,16 +11,32 @@ const MainPage: React.FC = () => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [messageCount, setMessageCount] = useState(0);
 
-    const HandleSendButton = async () => {
-        const currentValue = textareaRef.current?.value;
-        const trimmedValue = currentValue?.trim();
-        
-        if (trimmedValue) {    
-            setMessageCount((prevCount) => prevCount + 1);
+    const HandleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        const trimmedValue = value.trim();
 
-            if (chatId) { HandleInsertChatBubble(trimmedValue, chatId); }
-            setValue(''); 
-            textareaRef.current!.value = '';
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            if (trimmedValue && chatId) {
+                HandleInsertChatBubble(trimmedValue, chatId);
+                setMessageCount((prevCount) => prevCount + 1);
+                setValue('');
+                if (textareaRef.current) {
+                    textareaRef.current.value = '';
+                }
+            }
+        }
+    };
+
+    const HandleButtonClick = () => {
+        const trimmedValue = value.trim();
+
+        if (trimmedValue && chatId) {
+            HandleInsertChatBubble(trimmedValue, chatId);
+            setMessageCount((prevCount) => prevCount + 1);
+            setValue('');
+            if (textareaRef.current) {
+                textareaRef.current.value = '';
+            }
         }
     };
 
@@ -39,10 +55,10 @@ const MainPage: React.FC = () => {
                             value={value}
                             setValue={setValue}
                             textareaRef={textareaRef}
-                            chatId={chatId}
+                            onKeyDown={HandleKeyDown}
                         />
                     </div>
-                    <button id='input-button' onClick={HandleSendButton}>
+                    <button id='input-button' onClick={HandleButtonClick} >
                         <i className="fa-solid fa-paper-plane fa-lg"></i>
                     </button>
                 </div>  
@@ -57,27 +73,10 @@ interface ExpandableMessageBoxProps {
     value: string;
     setValue: (value: string) => void;
     textareaRef: React.RefObject<HTMLTextAreaElement>;
-    chatId: string | undefined;
+    onKeyDown: (event: React.KeyboardEvent<HTMLTextAreaElement>) => void;
 }
 
-const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setValue, textareaRef, chatId }) => {
-    const HandleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        const trimmedValue = value.trim();
-        
-        if (event.key === 'Enter') {
-            if (event.shiftKey) {
-                return;
-            } 
-            if (!trimmedValue || trimmedValue === '') {
-                event.preventDefault();
-            } else if (trimmedValue) {
-                if (chatId) { HandleInsertChatBubble(trimmedValue, chatId); }
-                setValue('');
-                event.preventDefault();
-            }
-        } 
-    }
-
+const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setValue, textareaRef, onKeyDown }) => {
     // this works for a line having 48 characters
     useEffect(() => {
         if (textareaRef.current) {
@@ -100,7 +99,7 @@ const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ value, setV
             ref={textareaRef}
             value={value}
             onChange={(e) => setValue(e.target.value)}
-            onKeyDown={HandleKeyDown}
+            onKeyDown={onKeyDown}
             placeholder="Type your message here..."
             className="expandable-textarea"
         />
@@ -158,7 +157,7 @@ interface Message {
     bubble_id: number;
     content: string;
     is_user_input: boolean;
-    creation_date: string; // or Date if already converted
+    creation_date: string;
     token_count: number;
 }
 
@@ -178,7 +177,6 @@ export const ChatConversation: React.FC<ChatConversationProps> = ({chatId, messa
     useEffect(() => {
         const fetchMessages = async () => {
             try {
-                console.log('messagecount ' + messageCount);
                 const response = await fetch(`http://localhost:5001/${chatId}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch messages');

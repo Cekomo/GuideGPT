@@ -8,20 +8,22 @@ CREATE TABLE chat_user (
 );
 
 CREATE TABLE chat_board (
-	user_id VARCHAR(10),
-	FOREIGN KEY (user_id) REFERENCES chat_user(user_id),
-    chat_id INT NOT NULL PRIMARY KEY,
+	user_id VARCHAR(10) NOT NULL,
+    chat_id INT NOT NULL,
     chat_title VARCHAR(80) NOT NULL, 
     message_count INT NOT NULL,
-    creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (chat_id, user_id),
+    FOREIGN KEY (user_id) REFERENCES chat_user(user_id),
 );
 
 CREATE TABLE chat_bubble (
-   chat_id int NOT NULL,
-   bubble_id int NOT NULL PRIMARY KEY,
-   content text NOT NULL,
-   is_user_input tinyint(1) NOT NULL,
-   creation_date datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-   token_count int NOT NULL,
-   FOREIGN KEY (chat_id) REFERENCES chat_board(chat_id)
+    chat_id INT NOT NULL,
+    bubble_id INT NOT NULL,
+    content TEXT NOT NULL,
+    is_user_input TINYINT(1) NOT NULL,
+    creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    token_count INT NOT NULL,
+    PRIMARY KEY (chat_id, bubble_id),
+    FOREIGN KEY (chat_id) REFERENCES chat_board(chat_id)
 );
