@@ -11,33 +11,15 @@ const MainPage: React.FC = () => {
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [messageCount, setMessageCount] = useState(0);
 
-    const HandleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        const trimmedValue = value.trim();
-
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
-            if (trimmedValue && chatId) {
-                HandleInsertChatBubble(trimmedValue, chatId);
-                setMessageCount((prevCount) => prevCount + 1);
-                setValue('');
-                if (textareaRef.current) {
-                    textareaRef.current.value = '';
-                }
-            }
+            HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
         }
     };
 
-    const HandleButtonClick = () => {
-        const trimmedValue = value.trim();
-
-        if (trimmedValue && chatId) {
-            HandleInsertChatBubble(trimmedValue, chatId);
-            setMessageCount((prevCount) => prevCount + 1);
-            setValue('');
-            if (textareaRef.current) {
-                textareaRef.current.value = '';
-            }
-        }
+    const handleButtonClick = () => {
+        HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
     };
 
     return (
@@ -55,10 +37,10 @@ const MainPage: React.FC = () => {
                             value={value}
                             setValue={setValue}
                             textareaRef={textareaRef}
-                            onKeyDown={HandleKeyDown}
+                            onKeyDown={handleKeyDown}
                         />
                     </div>
-                    <button id='input-button' onClick={HandleButtonClick} >
+                    <button id='input-button' onClick={handleButtonClick} >
                         <i className="fa-solid fa-paper-plane fa-lg"></i>
                     </button>
                 </div>  
@@ -68,6 +50,33 @@ const MainPage: React.FC = () => {
 }
   
 export default MainPage;
+
+interface HandleSendOperationProps {
+    value: string;
+    chatId?: string;
+    setValue: React.Dispatch<React.SetStateAction<string>>;
+    setMessageCount: React.Dispatch<React.SetStateAction<number>>;
+    textareaRef: React.RefObject<HTMLTextAreaElement>;
+}
+
+const HandleSendOperation = ({
+    value,
+    chatId,
+    setValue,
+    setMessageCount,
+    textareaRef,
+}: HandleSendOperationProps) => {
+    const trimmedValue = value.trim();
+
+    if (trimmedValue && chatId) {
+        HandleInsertChatBubble(trimmedValue, chatId); // Call your message insertion function
+        setMessageCount((prevCount) => prevCount + 1); // Update message count
+        setValue(''); // Clear the input field
+        if (textareaRef.current) {
+            textareaRef.current.value = ''; // Reset the textarea value
+        }
+    }
+};
 
 interface ExpandableMessageBoxProps {
     value: string;
