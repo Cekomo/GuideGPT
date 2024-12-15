@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import LoadingScreen from './pages/LoadingScreen.tsx';
-import MainPage, { ChatBoards } from './pages/MainPage.tsx';
+import MainPage from './pages/MainPage.tsx';
+import { ChatBoards } from  './pages/PageComponents.tsx';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
