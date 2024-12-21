@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './MainPage.css'
-import { ExpandableMessageBox, ChatConversation, ChatBoards } from './PageComponents'
+import { ExpandableMessageBox, ChatConversation, ChatBoards, CreateTextBubble } from './PageComponents'
 import { HandleSendOperation } from './ServerOperation'
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -17,11 +17,13 @@ const MainPage: React.FC = () => {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
             HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
+            // CreateTextBubble(value);
         }
     };
 
     const handleButtonClick = () => {
         HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
+        // CreateTextBubble(value);
     };
 
     return (

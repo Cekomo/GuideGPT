@@ -154,7 +154,7 @@ export const ChatBoards = () => {
 };
 
 
-function CreateTextBubble(text: string): void {
+export const CreateTextBubble = (text: string): void => {
     const bubbleContainer = document.getElementById('bubble-container') as HTMLElement;
     const textBubble = document.createElement("div");
     textBubble.classList.add('text-bubble');

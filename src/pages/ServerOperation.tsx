@@ -18,8 +18,8 @@ export const HandleSendOperation = ({
     const trimmedValue = value.trim();
 
     if (trimmedValue && chatId) {
-        HandleInsertChatBubble(trimmedValue, chatId); // Call your message insertion function
-        setMessageCount((prevCount) => prevCount + 1); // Update message count
+        HandleInsertChatBubble(trimmedValue, chatId, setMessageCount);
+        // setMessageCount((prevCount) => prevCount + 1);
         setValue(''); // Clear the input field
         if (textareaRef.current) {
             textareaRef.current.value = ''; // Reset the textarea value
@@ -27,7 +27,7 @@ export const HandleSendOperation = ({
     }
 };
 
-const HandleInsertChatBubble = async (text: string, chatId: string) =>  {
+const HandleInsertChatBubble = async (text: string, chatId: string, setMessageCount: React.Dispatch<React.SetStateAction<number>>) =>  {
     try {
         const currentDate = new Date().toISOString();
 
@@ -51,6 +51,7 @@ const HandleInsertChatBubble = async (text: string, chatId: string) =>  {
         if (response.ok) {
             const result = await response.json();
             console.log('Data inserted:', result);
+            setMessageCount((prevCount) => prevCount + 1)
         } else {
             console.error('Failed to insert data:', response);
         }
