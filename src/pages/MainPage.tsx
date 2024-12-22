@@ -4,6 +4,7 @@ import { ExpandableMessageBox, ChatConversation, ChatBoards, CreateTextBubble } 
 import { HandleSendOperation } from './ServerOperation'
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { useParams, useNavigate } from 'react-router-dom';
+import RetrieveGptRespond from './GPTController'
 
 
 const MainPage: React.FC = () => {
@@ -14,16 +15,23 @@ const MainPage: React.FC = () => {
     const [messageCount, setMessageCount] = useState(0);
 
     const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (event.key === 'Enter' && !event.shiftKey) {
+        if (event.key === 'Enter' && !event.shiftKey && value?.trim()) {
             event.preventDefault();
             HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
-            // CreateTextBubble(value);
+            RetrieveGptRespond(value)
+                .then((result) => console.log(result))
+                .catch((error) => console.error(error));
         }
     };
 
     const handleButtonClick = () => {
-        HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
-        // CreateTextBubble(value);
+        if (value?.trim()) {
+            HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
+            // CreateTextBubble(value);
+            RetrieveGptRespond(value)
+                .then((result) => console.log(result))
+                .catch((error) => console.error(error));
+        }
     };
 
     return (

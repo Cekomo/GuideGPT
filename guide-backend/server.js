@@ -4,6 +4,9 @@ const app = express();
 const bodyParser = require('body-parser');
 const port = 5001;
 const cors = require('cors');
+const { OpenAI } = require('openai');
+
+const openai = new OpenAI({ apiKey: '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' });
 
 const client = mysql.createPool({
     user: 'root',
@@ -65,6 +68,22 @@ app.post('/insert-chat-bubble-record', async (req, res) => {
         });
     }
 })
+
+app.post('/api/gpt_response', async (req, res) => {
+    const { prompt } = req.body;
+
+    try {
+        const completion = await openai.completions.create({
+            model: "gpt-3.5-turbo-0125",
+            prompt: prompt,
+            max_tokens: 200,
+        });
+        res.json({ completion: completion.choices[0]?.text || "No response available" });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message })
+    }
+});
 
 app.get('/', async(req, res) => {
     try {
