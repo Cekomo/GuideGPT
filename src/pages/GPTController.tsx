@@ -2,7 +2,7 @@ import React from 'react';
 import OpenAI from "openai";
 
 const RetrieveGptRespond = async (inputMessage: string) => {
-    const response = await fetch ( 'api/gpt_response', {
+    const response = await fetch ( 'http://localhost:5001/api/gpt_response', { // I can make this URL dynamic
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

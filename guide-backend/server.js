@@ -73,12 +73,14 @@ app.post('/api/gpt_response', async (req, res) => {
     const { prompt } = req.body;
 
     try {
-        const completion = await openai.completions.create({
+        const completion = await openai.chat.completions.create({
             model: "gpt-3.5-turbo-0125",
-            prompt: prompt,
+            messages: [
+                { role: "user", content: prompt } // User's input message
+            ],
             max_tokens: 200,
         });
-        res.json({ completion: completion.choices[0]?.text || "No response available" });
+        res.json({ completion: completion.choices[0]?.message.content || "No response available" });
     }
     catch (error) {
         res.status(500).json({ error: error.message })
