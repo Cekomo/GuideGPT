@@ -71,6 +71,7 @@ export const ChatConversation: React.FC<ChatConversationProps> = ({chatId, messa
                 setChatBoards(data.chatBoards || []);
                 setMessages(data.messages);
                 setLoading(false);
+                // setIfUserInput(data.);
             }
             catch {
                 setError(error);
@@ -88,9 +89,15 @@ export const ChatConversation: React.FC<ChatConversationProps> = ({chatId, messa
 
     const renderMessages = () => {
         return messages.map((msg) => (
-            <div key={msg.bubble_id} className="text-bubble">
-                {msg.content}
-            </div>
+            !!msg.is_user_input ? ( // Converts `1` or `0` to `true` or `false`
+                <div key={msg.bubble_id} className="text-bubble-right">
+                    {msg.content}
+                </div>
+            ) : (
+                <div key={msg.bubble_id} className="text-bubble-left">
+                    {msg.content}
+                </div>
+            )
         ));
     }
 

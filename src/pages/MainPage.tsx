@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './MainPage.css'
-import { ExpandableMessageBox, ChatConversation, ChatBoards, CreateTextBubble } from './PageComponents'
+import { ExpandableMessageBox, ChatConversation, ChatBoards } from './PageComponents'
 import { HandleSendOperation } from './ServerOperation'
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -13,24 +13,34 @@ const MainPage: React.FC = () => {
     
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [messageCount, setMessageCount] = useState(0);
+    // const [isUserInput, setIfUserInput] = useState(`0`);
 
-    const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const handleKeyDown = async (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === 'Enter' && !event.shiftKey && value?.trim()) {
             event.preventDefault();
             HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
-            RetrieveGptRespond(value)
-                .then((result) => console.log(result))
-                .catch((error) => console.error(error));
+            // setIfUserInput('1');
+            try {
+                const gptRespond = await RetrieveGptRespond(value); // Wait for the GPT response
+                HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef, gptRespond });
+                // setIfUserInput('0');
+            } catch (error) {
+                console.error(error);
+            }
         }
     };
 
-    const handleButtonClick = () => {
+    const handleButtonClick = async () => {
         if (value?.trim()) {
             HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
-            // CreateTextBubble(value);
-            RetrieveGptRespond(value)
-                .then((result) => console.log(result))
-                .catch((error) => console.error(error));
+            // setIfUserInput('1');
+            try {
+                const gptRespond = await RetrieveGptRespond(value); // Wait for the GPT response
+                HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef, gptRespond });
+                // setIfUserInput('0');
+            } catch (error) {
+                console.error(error);
+            }
         }
     };
 

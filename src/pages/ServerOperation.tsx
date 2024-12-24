@@ -6,6 +6,7 @@ interface HandleSendOperationProps {
     setValue: React.Dispatch<React.SetStateAction<string>>;
     setMessageCount: React.Dispatch<React.SetStateAction<number>>;
     textareaRef: React.RefObject<HTMLTextAreaElement>;
+    gptRespond?: string;
 }
 
 export const HandleSendOperation = ({
@@ -14,11 +15,18 @@ export const HandleSendOperation = ({
     setValue,
     setMessageCount,
     textareaRef,
+    gptRespond,
 }: HandleSendOperationProps) => {
     const trimmedValue = value.trim();
 
     if (trimmedValue && chatId) {
-        HandleInsertChatBubble(trimmedValue, chatId, setMessageCount);
+        if (gptRespond) {
+            HandleInsertChatBubble(gptRespond, `0`, chatId, setMessageCount);
+        }
+        else {
+            HandleInsertChatBubble(trimmedValue, `1`, chatId, setMessageCount);
+        }
+        
         // setMessageCount((prevCount) => prevCount + 1);
         setValue(''); // Clear the input field
         if (textareaRef.current) {
@@ -27,7 +35,7 @@ export const HandleSendOperation = ({
     }
 };
 
-const HandleInsertChatBubble = async (text: string, chatId: string, setMessageCount: React.Dispatch<React.SetStateAction<number>>) =>  {
+const HandleInsertChatBubble = async (text: string, isUserInput: string, chatId: string, setMessageCount: React.Dispatch<React.SetStateAction<number>>) =>  {
     try {
         const currentDate = new Date().toISOString();
 
@@ -42,7 +50,7 @@ const HandleInsertChatBubble = async (text: string, chatId: string, setMessageCo
                 chat_id: chatIdAsNumber,  
                 bubble_id: null,  
                 content: text,
-                is_user_input: true,
+                is_user_input: isUserInput,
                 creation_date: currentDate,
                 token_count: token_qty
             })
