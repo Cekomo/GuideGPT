@@ -12,16 +12,20 @@ export const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ valu
     // this works for a line having 48 characters
     useEffect(() => {
         if (textareaRef.current) {
-            const currentValue = textareaRef.current.value;
+            const currentValue = textareaRef.current.value.trim();
+            
             textareaRef.current.style.height = 'auto';
             if (currentValue.length <= 48) {
                 textareaRef.current.style.height = `${textareaRef.current.scrollHeight - 16}px`;
             } else {
                 textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
             }
-
             if (textareaRef.current.scrollHeight > 250) {
                 textareaRef.current.style.height = '250px'
+                textareaRef.current.style.overflowY = 'auto';
+            }
+            else {
+                textareaRef.current.style.overflowY = 'hidden';
             }
         }
     }, [value]);
