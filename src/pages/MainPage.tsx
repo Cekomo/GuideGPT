@@ -13,42 +13,52 @@ const MainPage: React.FC = () => {
     
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [messageCount, setMessageCount] = useState(0);
-    // const [isUserInput, setIfUserInput] = useState(`0`);
 
     const handleKeyDown = async (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === 'Enter' && !event.shiftKey && value?.trim()) {
             event.preventDefault();
             HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
-            // setIfUserInput('1');
             try {
                 const gptRespond = await RetrieveGptRespond(value); // Wait for the GPT response
                 HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef, gptRespond });
-                // setIfUserInput('0');
             } catch (error) {
                 console.error(error);
             }
+        }
+        else if (event.key === 'Enter' && !event.shiftKey &&!value?.trim()) {
+            event.preventDefault();
         }
     };
 
     const handleButtonClick = async () => {
         if (value?.trim()) {
             HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
-            // setIfUserInput('1');
             try {
                 const gptRespond = await RetrieveGptRespond(value); // Wait for the GPT response
                 HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef, gptRespond });
-                // setIfUserInput('0');
+               
             } catch (error) {
                 console.error(error);
             }
         }
     };
 
+    const addNewChat = async () => {
+        console.log('Chat is inserted!');
+    }
+
     return (
         <div id='main-page'>    
             <div id='chat-container'>
-                <div id='chat-board-list'>
-                    <ChatBoards/>
+                <div id='left-panel'>
+                    <div id='chat-board-list'>
+                        <ChatBoards/>
+                    </div>
+                    <div id='control-panel'>
+                        <button id='chat-adder-button' onClick={addNewChat}>
+                            <i className="fa-solid fa-plus"></i>
+                        </button>
+                    </div>
                 </div>
                 <div id='chat-board'>
                     <div id='bubble-container'>
