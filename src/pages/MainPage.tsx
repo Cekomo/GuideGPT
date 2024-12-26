@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './MainPage.css'
 import { ExpandableMessageBox, ChatConversation, ChatBoards } from './PageComponents'
-import { HandleSendOperation } from './ServerOperation'
+import { HandleSendOperation, HandleInsertChatBoard } from './ServerOperation'
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { useParams, useNavigate } from 'react-router-dom';
 import RetrieveGptRespond from './GPTController'
@@ -44,7 +44,7 @@ const MainPage: React.FC = () => {
     };
 
     const addNewChat = async () => {
-        console.log('Chat is inserted!');
+        HandleInsertChatBoard('U0001', '3', 'New Conversation');
     }
 
     return (

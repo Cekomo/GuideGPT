@@ -52,7 +52,7 @@ body, html {
 
 #control-panel {
     display: flex; 
-    margin: 16px 32px;
+    margin: 12px 24px;
 }
 
 #chat-adder-button {
@@ -68,13 +68,11 @@ body, html {
 }
 
 #chat-adder-button:hover {
-    /* background-color: #a1a1aa; */
-    transform: translateY(1px);
+    background-color: #a1a1aa;
 }
 
 #chat-adder-button:active {
-    background-color: #a1a1aa;
-    transform: translateY(3px);
+    transform: translateY(2px);
 }
 
 

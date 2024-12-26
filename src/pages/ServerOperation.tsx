@@ -35,6 +35,35 @@ export const HandleSendOperation = ({
     }
 };
 
+
+export const HandleInsertChatBoard = async (userId: string, chatId: string, chatTitle: string) => {
+    try {
+        const currentDate = new Date().toISOString();
+        const chatIdAsNumber = chatId ? parseInt(chatId, 10) : null;
+        const response = await fetch('http://localhost:5001/insert-chat-board-record', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                chat_id: chatId,  
+                chat_title: chatTitle,
+                message_count: 0,
+                creation_date: currentDate
+            })
+        });
+
+        if (!response.ok) {
+            const errorDetails = await response.text(); // capture the error details
+            console.error('Failed to insert data:', errorDetails);
+            return; // exit the function if the response is not ok
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
 const HandleInsertChatBubble = async (text: string, isUserInput: string, chatId: string, setMessageCount: React.Dispatch<React.SetStateAction<number>>) =>  {
     try {
         const currentDate = new Date().toISOString();
@@ -56,13 +85,13 @@ const HandleInsertChatBubble = async (text: string, isUserInput: string, chatId:
             })
         });
 
-        if (response.ok) {
-            const result = await response.json();
-            console.log('Data inserted:', result);
-            setMessageCount((prevCount) => prevCount + 1)
-        } else {
-            console.error('Failed to insert data:', response);
+        if (!response.ok) {
+            const errorDetails = await response.text();
+            console.error('Failed to insert data:', errorDetails);
+            return { success: false, error: errorDetails };
         }
+
+        return { success: true };
     }
     catch (error) {
         console.error('Error:', error);

@@ -27,3 +27,7 @@ CREATE TABLE chat_bubble (
     PRIMARY KEY (chat_id, bubble_id),
     FOREIGN KEY (chat_id) REFERENCES chat_board(chat_id)
 );
+
+-- chat board insertion script
+INSERT INTO chat_board (user_id, chat_id, chat_title, message_count, creation_date)
+VALUES (?, ?, 'New Conversation', 0, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'));

@@ -36,6 +36,49 @@ async function getNextBubbleId (chatId) {
     }
 }
 
+async function getNextChatBoardId (userId) {
+    const lastChatBoardQuery = 'SELECT MAX(chat_id) as maxChatBoardId FROM chat_board WHERE user_id = ?';
+    try {
+        const [rows] = await client.execute(lastChatBoardQuery, [chatId]);
+        const lastChatBoardId = rows[0]?.maxChatBoardId || 0;
+        return lastChatBoardId + 1;
+    }
+    catch (error) {
+        console.error('Error retrieving last bubble_id: ', error);
+        throw error;
+    }
+}
+
+app.post('/insert-chat-board-record', async (req, res) => {
+    const data = req.body;
+
+    try {
+        const lastChatBoardId = await getNextChatBoardId(data.user_id);
+
+        const query = `
+        INSERT INTO chat_board (user_id, chat_id, chat_title, message_count, creation_date)
+        VALUES (?, ?, ?, ?, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'));`;
+
+        const values = [
+            data.user_id,
+            lastChatBoardId,
+            data.chat_title,
+            data.message_count,
+            data.creation_date
+        ];
+        const result = await client.query(query, values);
+        res.status(201).json( {
+            message: 'Chat board data is inserted.',
+            data: data
+        });
+    } catch (error) {
+        console.error('Error during insert:', error);
+        return res.status(500).json({
+            message: 'Server error',
+            error: error.message
+        });
+    }
+})
 
 app.post('/insert-chat-bubble-record', async (req, res) => {
     const data = req.body;
@@ -44,8 +87,8 @@ app.post('/insert-chat-bubble-record', async (req, res) => {
         
         const query = `
         INSERT INTO chat_bubble (chat_id, bubble_id, content, is_user_input, creation_date, token_count)
-        VALUES (?, ?, ?, ?, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'), ?);
-        `;
+        VALUES (?, ?, ?, ?, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'), ?);`;
+
         const values = [
             data.chat_id,
             lastBubbleId,
@@ -123,9 +166,6 @@ app.get('/:chatId', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-
-
-
 
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
