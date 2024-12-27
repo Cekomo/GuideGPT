@@ -47,7 +47,7 @@ export const HandleInsertChatBoard = async (userId: string, chatId: string, chat
             },
             body: JSON.stringify({
                 user_id: userId,
-                chat_id: chatId,  
+                chat_id: chatIdAsNumber,  
                 chat_title: chatTitle,
                 message_count: 0,
                 creation_date: currentDate

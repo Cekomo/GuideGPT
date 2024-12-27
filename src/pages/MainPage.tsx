@@ -44,7 +44,8 @@ const MainPage: React.FC = () => {
     };
 
     const addNewChat = async () => {
-        HandleInsertChatBoard('U0001', '3', 'New Conversation');
+        const safeChatId = chatId ?? 'default';
+        HandleInsertChatBoard('U0001', safeChatId, 'New Conversation');
     }
 
     return (
