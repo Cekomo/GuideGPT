@@ -36,22 +36,22 @@ async function getNextBubbleId (chatId) {
     }
 }
 
-async function getNextChatBoardId (userId) {
+async function getNextChatBoardId(userId) {
     const lastChatBoardQuery = 'SELECT MAX(chat_id) as maxChatBoardId FROM chat_board WHERE user_id = ?';
     try {
-        const [rows] = await client.execute(lastChatBoardQuery, [chatId]);
+        const [rows] = await client.execute(lastChatBoardQuery, [userId]);
         const lastChatBoardId = rows[0]?.maxChatBoardId || 0;
         return lastChatBoardId + 1;
-    }
-    catch (error) {
+    } catch (error) {
         console.error('Error retrieving last bubble_id: ', error);
         throw error;
     }
 }
 
+
 app.post('/insert-chat-board-record', async (req, res) => {
     const data = req.body;
-
+    
     try {
         const lastChatBoardId = await getNextChatBoardId(data.user_id);
 
@@ -67,6 +67,7 @@ app.post('/insert-chat-board-record', async (req, res) => {
             data.creation_date
         ];
         const result = await client.query(query, values);
+        
         res.status(201).json( {
             message: 'Chat board data is inserted.',
             data: data

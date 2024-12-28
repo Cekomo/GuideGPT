@@ -36,10 +36,10 @@ export const HandleSendOperation = ({
 };
 
 
-export const HandleInsertChatBoard = async (userId: string, chatId: string, chatTitle: string) => {
+export const HandleInsertChatBoard = async (userId: string, chatTitle: string) => {
     try {
         const currentDate = new Date().toISOString();
-        const chatIdAsNumber = chatId ? parseInt(chatId, 10) : null;
+        
         const response = await fetch('http://localhost:5001/insert-chat-board-record', {
             method: 'POST',
             headers: {
@@ -47,17 +47,17 @@ export const HandleInsertChatBoard = async (userId: string, chatId: string, chat
             },
             body: JSON.stringify({
                 user_id: userId,
-                chat_id: chatIdAsNumber,  
+                chat_id: null,  
                 chat_title: chatTitle,
                 message_count: 0,
                 creation_date: currentDate
             })
         });
-
+        
         if (!response.ok) {
             const errorDetails = await response.text(); // capture the error details
             console.error('Failed to insert data:', errorDetails);
-            return; // exit the function if the response is not ok
+            return; 
         }
     } catch (error) {
         console.error('Error:', error);
