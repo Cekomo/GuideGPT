@@ -93,7 +93,7 @@ export const ChatConversation: React.FC<ChatConversationProps> = ({chatId, messa
 
     const renderMessages = () => {
         return messages.map((msg) => (
-            !!msg.is_user_input ? ( // Converts `1` or `0` to `true` or `false`
+            !! msg.is_user_input ? ( // Converts `1` or `0` to `true` or `false`
                 <div key={msg.bubble_id} className="text-bubble-right">
                     {msg.content}
                 </div>

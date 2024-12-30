@@ -23,14 +23,10 @@ client.getConnection().catch(err => {
 app.use(express.json());
 app.use(cors());
 
-async function getNextBubbleId (userId, chatId) {
-    if (chatId == 0) {
-        chatId = getNextChatBoardId(userId)
-    }
-
-    const lastBubbleQuery = 'SELECT MAX(bubble_id) as maxBubbleId FROM chat_bubble WHERE user_id = ? AND chat_id = ?';
+async function getNextBubbleId (chatId) {
+    const lastBubbleQuery = 'SELECT MAX(bubble_id) as maxBubbleId FROM chat_bubble WHERE chat_id = ?';
     try {
-        const [rows] = await client.execute(lastBubbleQuery, [userId, chatId]);
+        const [rows] = await client.execute(lastBubbleQuery, [chatId]);
         const lastBubbleId = rows[0]?.maxBubbleId || 0;
         return lastBubbleId + 1;
     }
@@ -76,21 +72,21 @@ app.post('/insert-chat-board-record', async (req, res) => {
     const data = req.body;
     
     try {
-        const lastChatBoardId = await insertChatBoardRecord(data);
-        // const lastChatBoardId = await getNextChatBoardId(data.user_id);
+        // const lastChatBoardId = await insertChatBoardRecord(data);
+        const lastChatBoardId = await getNextChatBoardId(data.user_id);
+        
+        const query = `
+        INSERT INTO chat_board (user_id, chat_id, chat_title, message_count, creation_date)
+        VALUES (?, ?, ?, ?, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'));`;
 
-        // const query = `
-        // INSERT INTO chat_board (user_id, chat_id, chat_title, message_count, creation_date)
-        // VALUES (?, ?, ?, ?, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'));`;
-
-        // const values = [
-        //     data.user_id,
-        //     lastChatBoardId,
-        //     data.chat_title,
-        //     data.message_count,
-        //     data.creation_date
-        // ];
-        // const result = await client.query(query, values);
+        const values = [
+            data.user_id,
+            lastChatBoardId,
+            data.chat_title,
+            data.message_count,
+            data.creation_date
+        ];
+        const result = await client.query(query, values);
         
         res.status(201).json( {
             message: 'Chat board data is inserted.',
@@ -108,16 +104,12 @@ app.post('/insert-chat-board-record', async (req, res) => {
 app.post('/insert-chat-bubble-record', async (req, res) => {
     const data = req.body;
     try {
-        if (data.chat_id == 0) {
-            data.chat_id = await insertChatBoardRecord(data);
-        }
-
-        const lastBubbleId = await getNextBubbleId('U0001', data.chat_id);
+        const lastBubbleId = await getNextBubbleId(data.chat_id);
         
         const query = `
         INSERT INTO chat_bubble (chat_id, bubble_id, content, is_user_input, creation_date, token_count)
         VALUES (?, ?, ?, ?, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'), ?);`;
-
+        
         const values = [
             data.chat_id,
             lastBubbleId,

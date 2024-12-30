@@ -9,7 +9,7 @@ interface HandleSendOperationProps {
     gptRespond?: string;
 }
 
-export const HandleSendOperation = ({
+export const HandleSendOperation = async ({
     value,
     chatId,
     setValue,
@@ -18,8 +18,11 @@ export const HandleSendOperation = ({
     gptRespond,
 }: HandleSendOperationProps) => {
     const trimmedValue = value.trim();
-
-    if (trimmedValue && chatId) {
+    if (trimmedValue && chatId == "0") {
+        const chatId = await HandleInsertChatBoard('U0001', 'New Conversation');
+        await HandleInsertChatBubble(trimmedValue, `1`, chatId, setMessageCount);
+    }
+    else if (trimmedValue && chatId) {
         if (gptRespond) {
             HandleInsertChatBubble(gptRespond, `0`, chatId, setMessageCount);
         }
@@ -39,7 +42,6 @@ export const HandleSendOperation = ({
 export const HandleInsertChatBoard = async (userId: string, chatTitle: string) => {
     try {
         const currentDate = new Date().toISOString();
-        
         const response = await fetch('http://localhost:5001/insert-chat-board-record', {
             method: 'POST',
             headers: {
@@ -57,8 +59,11 @@ export const HandleInsertChatBoard = async (userId: string, chatTitle: string) =
         if (!response.ok) {
             const errorDetails = await response.text(); // capture the error details
             console.error('Failed to insert data:', errorDetails);
-            return; 
+            return null; 
         }
+
+        const result = await response.json();
+        return result.chat_id; // Return the chat_id
     } catch (error) {
         console.error('Error:', error);
     }
@@ -67,8 +72,8 @@ export const HandleInsertChatBoard = async (userId: string, chatTitle: string) =
 const HandleInsertChatBubble = async (text: string, isUserInput: string, chatId: string, setMessageCount: React.Dispatch<React.SetStateAction<number>>) =>  {
     try {
         const currentDate = new Date().toISOString();
-
         const token_qty = Math.ceil(text.length / 4);
+        
         const chatIdAsNumber = chatId ? parseInt(chatId, 10) : null;
         const response = await fetch('http://localhost:5001/insert-chat-bubble-record', {
             method: 'POST',
