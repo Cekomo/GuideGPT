@@ -23,10 +23,14 @@ client.getConnection().catch(err => {
 app.use(express.json());
 app.use(cors());
 
-async function getNextBubbleId (chatId) {
-    const lastBubbleQuery = 'SELECT MAX(bubble_id) as maxBubbleId FROM chat_bubble WHERE chat_id = ?';
+async function getNextBubbleId (userId, chatId) {
+    if (chatId == 0) {
+        chatId = getNextChatBoardId(userId)
+    }
+
+    const lastBubbleQuery = 'SELECT MAX(bubble_id) as maxBubbleId FROM chat_bubble WHERE user_id = ? AND chat_id = ?';
     try {
-        const [rows] = await client.execute(lastBubbleQuery, [chatId]);
+        const [rows] = await client.execute(lastBubbleQuery, [userId, chatId]);
         const lastBubbleId = rows[0]?.maxBubbleId || 0;
         return lastBubbleId + 1;
     }
@@ -48,25 +52,45 @@ async function getNextChatBoardId(userId) {
     }
 }
 
+async function insertChatBoardRecord(data) {
+    const lastChatBoardId = await getNextChatBoardId(data.user_id);
+
+    const query = `
+    INSERT INTO chat_board (user_id, chat_id, chat_title, message_count, creation_date)
+    VALUES (?, ?, ?, ?, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'));`;
+    
+    const values = [
+        data.user_id,
+        lastChatBoardId,
+        data.chat_title,
+        data.message_count,
+        data.creation_date
+    ];
+
+    await client.query(query, values);
+    return lastChatBoardId;
+}
+
 
 app.post('/insert-chat-board-record', async (req, res) => {
     const data = req.body;
     
     try {
-        const lastChatBoardId = await getNextChatBoardId(data.user_id);
+        const lastChatBoardId = await insertChatBoardRecord(data);
+        // const lastChatBoardId = await getNextChatBoardId(data.user_id);
 
-        const query = `
-        INSERT INTO chat_board (user_id, chat_id, chat_title, message_count, creation_date)
-        VALUES (?, ?, ?, ?, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'));`;
+        // const query = `
+        // INSERT INTO chat_board (user_id, chat_id, chat_title, message_count, creation_date)
+        // VALUES (?, ?, ?, ?, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'));`;
 
-        const values = [
-            data.user_id,
-            lastChatBoardId,
-            data.chat_title,
-            data.message_count,
-            data.creation_date
-        ];
-        const result = await client.query(query, values);
+        // const values = [
+        //     data.user_id,
+        //     lastChatBoardId,
+        //     data.chat_title,
+        //     data.message_count,
+        //     data.creation_date
+        // ];
+        // const result = await client.query(query, values);
         
         res.status(201).json( {
             message: 'Chat board data is inserted.',
@@ -84,7 +108,11 @@ app.post('/insert-chat-board-record', async (req, res) => {
 app.post('/insert-chat-bubble-record', async (req, res) => {
     const data = req.body;
     try {
-        const lastBubbleId = await getNextBubbleId(data.chat_id);
+        if (data.chat_id == 0) {
+            data.chat_id = await insertChatBoardRecord(data);
+        }
+
+        const lastBubbleId = await getNextBubbleId('U0001', data.chat_id);
         
         const query = `
         INSERT INTO chat_bubble (chat_id, bubble_id, content, is_user_input, creation_date, token_count)
@@ -153,12 +181,16 @@ app.get('/:chatId', async (req, res) => {
     const { chatId } = req.params;
     try {
         const [bubbles] = await client.execute('SELECT * FROM chat_bubble WHERE chat_id = ?', [chatId]); // user_id will be added
-        bubbles
         if (bubbles.length > 0) {
             res.json({ 
                 messages: bubbles
             });
-        } else {
+        } else if (chatId == 0) {
+            res.json({ 
+                messages: bubbles
+            });
+        }
+        else {
             res.status(404).json({ message: 'Chat bubble not found.' });
         }
         

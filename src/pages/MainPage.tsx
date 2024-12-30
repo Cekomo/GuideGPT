@@ -9,10 +9,19 @@ import RetrieveGptRespond from './GPTController'
 
 const MainPage: React.FC = () => {
     const [value, setValue] = useState(''); 
+    const navigate = useNavigate();
     const { chatId } = useParams<{ chatId: string }>();
     
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [messageCount, setMessageCount] = useState(0);
+
+    const navigateToStartPage = async () => {
+        try {
+            navigate('/conversation/0');
+        } catch {
+            console.error('Start page cannot be navigated.');
+        }
+    }
 
     const handleKeyDown = async (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === 'Enter' && !event.shiftKey && value?.trim()) {
@@ -44,7 +53,19 @@ const MainPage: React.FC = () => {
     };
 
     const addNewChat = async () => {
-        HandleInsertChatBoard('U0001', 'New Conversation');
+        // create temporary object that presents a chatboard item,
+        // NOTE: more than single temp chat board is NOT allowed
+        // this temporary object will be insterted as chat bubble and chatboard items when user provides any message
+        // --------------------------
+
+        // first clean up the messages,
+        
+        // then if user send any message:
+        // - create chatboard object and insert that
+        // HandleInsertChatBoard('U0001', 'New Conversation');
+        // - create chatbubble object and insert that
+        // 
+        navigateToStartPage();
     }
 
     return (
