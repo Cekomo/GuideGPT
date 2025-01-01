@@ -3,25 +3,28 @@ import './MainPage.css'
 import { ExpandableMessageBox, ChatConversation, ChatBoards } from './PageComponents'
 import { HandleSendOperation, HandleInsertChatBoard } from './ServerOperation'
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import RetrieveGptRespond from './GPTController'
 
 
 const MainPage: React.FC = () => {
     const [value, setValue] = useState(''); 
     const navigate = useNavigate();
+    const location = useLocation();
     const { chatId } = useParams<{ chatId: string }>();
     
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [messageCount, setMessageCount] = useState(0);
+    const pathSegments = location.pathname.split('/').filter(Boolean);
+    const lastSegment = pathSegments[pathSegments.length - 1];
 
-    const navigateToStartPage = async () => {
+    const navigateToStartPage = async (chatId: string = '') => {
         try {
-            navigate('/conversation/0');
+            navigate(`/conversation/${chatId}`);
         } catch {
             console.error('Start page cannot be navigated.');
         }
-    }
+    };
 
     const handleKeyDown = async (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === 'Enter' && !event.shiftKey && value?.trim()) {
@@ -32,6 +35,9 @@ const MainPage: React.FC = () => {
                 HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef, gptRespond });
             } catch (error) {
                 console.error(error);
+            }
+            if (lastSegment == '0') {
+                navigateToStartPage(chatId?.toString());
             }
         }
         else if (event.key === 'Enter' && !event.shiftKey &&!value?.trim()) {
@@ -45,27 +51,17 @@ const MainPage: React.FC = () => {
             try {
                 const gptRespond = await RetrieveGptRespond(value); // Wait for the GPT response
                 HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef, gptRespond });
-               
             } catch (error) {
                 console.error(error);
+            }
+            if (lastSegment == '0') {
+                navigateToStartPage(chatId?.toString());
             }
         }
     };
 
     const addNewChat = async () => {
-        // create temporary object that presents a chatboard item,
-        // NOTE: more than single temp chat board is NOT allowed
-        // this temporary object will be insterted as chat bubble and chatboard items when user provides any message
-        // --------------------------
-
-        // first clean up the messages,
-        
-        // then if user send any message:
-        // - create chatboard object and insert that
-        // HandleInsertChatBoard('U0001', 'New Conversation');
-        // - create chatbubble object and insert that
-        // 
-        navigateToStartPage();
+        navigateToStartPage('0');
     }
 
     return (

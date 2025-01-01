@@ -19,22 +19,26 @@ export const HandleSendOperation = async ({
 }: HandleSendOperationProps) => {
     const trimmedValue = value.trim();
     if (trimmedValue && chatId == "0") {
-        const chatId = await HandleInsertChatBoard('U0001', 'New Conversation');
-        await HandleInsertChatBubble(trimmedValue, `1`, chatId, setMessageCount);
-    }
-    else if (trimmedValue && chatId) {
-        if (gptRespond) {
-            HandleInsertChatBubble(gptRespond, `0`, chatId, setMessageCount);
+        if (!gptRespond) {
+            const chatId = await HandleInsertChatBoard('U0001', 'New Conversation');
+            await HandleInsertChatBubble(trimmedValue, `1`, chatId, setMessageCount);
         }
         else {
-            HandleInsertChatBubble(trimmedValue, `1`, chatId, setMessageCount);
+            await HandleInsertChatBubble(trimmedValue, `0`, chatId, setMessageCount);
         }
-        
-        // setMessageCount((prevCount) => prevCount + 1);
-        setValue(''); // Clear the input field
-        if (textareaRef.current) {
-            textareaRef.current.value = ''; // Reset the textarea value
+    }
+    else if (trimmedValue && chatId && chatId != "0") {
+        if (gptRespond) {
+            await HandleInsertChatBubble(gptRespond, `0`, chatId, setMessageCount);
         }
+        else {
+            await HandleInsertChatBubble(trimmedValue, `1`, chatId, setMessageCount);
+        }
+    }
+    // setMessageCount((prevCount) => prevCount + 1);
+    setValue(''); // Clear the input field
+    if (textareaRef.current) {
+        textareaRef.current.value = ''; // Reset the textarea value
     }
 };
 
@@ -73,8 +77,8 @@ const HandleInsertChatBubble = async (text: string, isUserInput: string, chatId:
     try {
         const currentDate = new Date().toISOString();
         const token_qty = Math.ceil(text.length / 4);
-        
         const chatIdAsNumber = chatId ? parseInt(chatId, 10) : null;
+        
         const response = await fetch('http://localhost:5001/insert-chat-bubble-record', {
             method: 'POST',
             headers: {

@@ -87,9 +87,9 @@ app.post('/insert-chat-board-record', async (req, res) => {
             data.creation_date
         ];
         const result = await client.query(query, values);
-        
         res.status(201).json( {
             message: 'Chat board data is inserted.',
+            chat_id: lastChatBoardId,
             data: data
         });
     } catch (error) {
@@ -105,7 +105,7 @@ app.post('/insert-chat-bubble-record', async (req, res) => {
     const data = req.body;
     try {
         const lastBubbleId = await getNextBubbleId(data.chat_id);
-        
+
         const query = `
         INSERT INTO chat_bubble (chat_id, bubble_id, content, is_user_input, creation_date, token_count)
         VALUES (?, ?, ?, ?, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'), ?);`;
