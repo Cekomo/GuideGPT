@@ -20,12 +20,12 @@ export const HandleSendOperation = async ({
     const trimmedValue = value.trim();
     if (trimmedValue && chatId == "0") {
         if (!gptRespond) {
-            const chatId = await HandleInsertChatBoard('U0001', 'New Conversation');
             await HandleInsertChatBubble(trimmedValue, `1`, chatId, setMessageCount);
         }
         else {
             await HandleInsertChatBubble(trimmedValue, `0`, chatId, setMessageCount);
         }
+        
     }
     else if (trimmedValue && chatId && chatId != "0") {
         if (gptRespond) {
@@ -40,6 +40,7 @@ export const HandleSendOperation = async ({
     if (textareaRef.current) {
         textareaRef.current.value = ''; // Reset the textarea value
     }
+    return chatId;
 };
 
 

@@ -11,12 +11,12 @@ const MainPage: React.FC = () => {
     const [value, setValue] = useState(''); 
     const navigate = useNavigate();
     const location = useLocation();
-    const { chatId } = useParams<{ chatId: string }>();
+    let { chatId } = useParams<{ chatId: string }>();
     
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [messageCount, setMessageCount] = useState(0);
     const pathSegments = location.pathname.split('/').filter(Boolean);
-    const lastSegment = pathSegments[pathSegments.length - 1];
+    const urlLastSegment = pathSegments[pathSegments.length - 1];
 
     const navigateToStartPage = async (chatId: string = '') => {
         try {
@@ -29,6 +29,10 @@ const MainPage: React.FC = () => {
     const handleKeyDown = async (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === 'Enter' && !event.shiftKey && value?.trim()) {
             event.preventDefault();
+
+            if (urlLastSegment == '0') {
+                chatId = await HandleInsertChatBoard('U0001', 'New Conversation');
+            }
             HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
             try {
                 const gptRespond = await RetrieveGptRespond(value); // Wait for the GPT response
@@ -36,7 +40,7 @@ const MainPage: React.FC = () => {
             } catch (error) {
                 console.error(error);
             }
-            if (lastSegment == '0') {
+            if (urlLastSegment == '0') {
                 navigateToStartPage(chatId?.toString());
             }
         }
@@ -47,6 +51,9 @@ const MainPage: React.FC = () => {
 
     const handleButtonClick = async () => {
         if (value?.trim()) {
+            if (urlLastSegment == '0') {
+                chatId = await HandleInsertChatBoard('U0001', 'New Conversation');
+            }
             HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
             try {
                 const gptRespond = await RetrieveGptRespond(value); // Wait for the GPT response
@@ -54,7 +61,7 @@ const MainPage: React.FC = () => {
             } catch (error) {
                 console.error(error);
             }
-            if (lastSegment == '0') {
+            if (urlLastSegment == '0') {
                 navigateToStartPage(chatId?.toString());
             }
         }
