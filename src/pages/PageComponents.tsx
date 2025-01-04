@@ -75,7 +75,6 @@ export const ChatConversation: React.FC<ChatConversationProps> = ({chatId, messa
                 setChatBoards(data.chatBoards || []);
                 setMessages(data.messages);
                 setLoading(false);
-                // setIfUserInput(data.);
             }
             catch {
                 setError(error);
@@ -83,7 +82,32 @@ export const ChatConversation: React.FC<ChatConversationProps> = ({chatId, messa
             }
         };
         fetchMessages();
-    }, [chatId, messageCount]);
+    }, [chatId]);
+
+    useEffect(() => {
+        const fetchLastMessage = async () => {
+            try {
+                const response = await fetch(`http://localhost:5001/${chatId}?lastMessage=true`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch last message');
+                }
+
+                const data = await response.json();
+                if (data.messages) {
+                    setMessages((prevMessages) => [...prevMessages, ...data.messages]);
+                }
+            }
+            catch {
+                setError(error);
+                setLoading(false);
+            }
+        };
+        if (messageCount > 0) {
+            fetchLastMessage();
+        }
+    }, [messageCount]);
+
+
 
     useEffect(() => {
         if (bubbleContainerRef.current) {

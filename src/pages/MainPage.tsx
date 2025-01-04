@@ -13,8 +13,10 @@ const MainPage: React.FC = () => {
     const location = useLocation();
     let { chatId } = useParams<{ chatId: string }>();
     
+    
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [messageCount, setMessageCount] = useState(0);
+    let updatedMessageCount = 0;
     const pathSegments = location.pathname.split('/').filter(Boolean);
     const urlLastSegment = pathSegments[pathSegments.length - 1];
 
@@ -33,10 +35,12 @@ const MainPage: React.FC = () => {
             if (urlLastSegment == '0') {
                 chatId = await HandleInsertChatBoard('U0001', 'New Conversation');
             }
-            HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
+            updatedMessageCount = await HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
+            setMessageCount(updatedMessageCount);
             try {
                 const gptRespond = await RetrieveGptRespond(value); // Wait for the GPT response
-                HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef, gptRespond });
+                updatedMessageCount = await HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef, gptRespond });
+                setMessageCount(updatedMessageCount);
             } catch (error) {
                 console.error(error);
             }
@@ -54,10 +58,12 @@ const MainPage: React.FC = () => {
             if (urlLastSegment == '0') {
                 chatId = await HandleInsertChatBoard('U0001', 'New Conversation');
             }
-            HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
+            updatedMessageCount = await HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
+            setMessageCount(updatedMessageCount);
             try {
                 const gptRespond = await RetrieveGptRespond(value); // Wait for the GPT response
-                HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef, gptRespond });
+                updatedMessageCount = await HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef, gptRespond });
+                setMessageCount(updatedMessageCount);
             } catch (error) {
                 console.error(error);
             }

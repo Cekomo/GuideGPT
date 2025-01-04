@@ -18,21 +18,22 @@ export const HandleSendOperation = async ({
     gptRespond,
 }: HandleSendOperationProps) => {
     const trimmedValue = value.trim();
+    let updatedMessageCount = 0;
     if (trimmedValue && chatId == "0") {
         if (!gptRespond) {
-            await HandleInsertChatBubble(trimmedValue, `1`, chatId, setMessageCount);
+            updatedMessageCount = await HandleInsertChatBubble(trimmedValue, `1`, chatId, setMessageCount);
         }
         else {
-            await HandleInsertChatBubble(trimmedValue, `0`, chatId, setMessageCount);
+            updatedMessageCount = await HandleInsertChatBubble(trimmedValue, `0`, chatId, setMessageCount);
         }
         
     }
     else if (trimmedValue && chatId && chatId != "0") {
         if (gptRespond) {
-            await HandleInsertChatBubble(gptRespond, `0`, chatId, setMessageCount);
+            updatedMessageCount =  await HandleInsertChatBubble(gptRespond, `0`, chatId, setMessageCount);
         }
         else {
-            await HandleInsertChatBubble(trimmedValue, `1`, chatId, setMessageCount);
+            updatedMessageCount = await HandleInsertChatBubble(trimmedValue, `1`, chatId, setMessageCount);
         }
     }
     // setMessageCount((prevCount) => prevCount + 1);
@@ -40,7 +41,7 @@ export const HandleSendOperation = async ({
     if (textareaRef.current) {
         textareaRef.current.value = ''; // Reset the textarea value
     }
-    return chatId;
+    return updatedMessageCount;
 };
 
 
@@ -101,9 +102,36 @@ const HandleInsertChatBubble = async (text: string, isUserInput: string, chatId:
             return { success: false, error: errorDetails };
         }
 
-        return { success: true };
+        const updateResult = await updateChatBoardMessageCount(chatId);
+        return updateResult?.messageCount;      
     }
     catch (error) {
         console.error('Error:', error);
     }
 }
+
+const updateChatBoardMessageCount = async (chatId: string) => {
+    try {
+        const response = await fetch(`http://localhost:5001/${chatId}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_id: 'U0001'
+            })
+        });
+
+        if (!response.ok) {
+            const errorDetails = await response.text();
+            console.error('Failed to update chat message count:', errorDetails);
+            return { success: false, error: errorDetails };
+        }
+        const data = await response.json();
+        return { success: true, messageCount: data.messageCount };
+
+    }
+    catch (error) {
+        console.error('Error:', error);
+    }
+}; 

@@ -31,7 +31,7 @@ async function getNextBubbleId (chatId) {
         return lastBubbleId + 1;
     }
     catch (error) {
-        console.error('Error retrieving last bubble_id: ', error);
+        console.error('Error retrieving last bubble id: ', error);
         throw error;
     }
 }
@@ -43,7 +43,21 @@ async function getNextChatBoardId(userId) {
         const lastChatBoardId = rows[0]?.maxChatBoardId || 0;
         return lastChatBoardId + 1;
     } catch (error) {
-        console.error('Error retrieving last bubble_id: ', error);
+        console.error('Error retrieving last chat board id: ', error);
+        throw error;
+    }
+}
+
+async function getUpdatedMessageCount (chatId, userId) {
+    const chatBoardQuery = 'SELECT message_count as messageCount FROM chat_board WHERE chat_id = ? AND user_id = ?';
+    
+    try {
+        const [rows] = await client.execute(chatBoardQuery, [chatId, userId]);
+        const messageCount = rows[0]?.messageCount || 0;
+        return messageCount + 1;
+    }
+    catch (error) {
+        console.error('Error message count: ', error);
         throw error;
     }
 }
@@ -151,6 +165,28 @@ app.post('/api/gpt_response', async (req, res) => {
     }
 });
 
+
+app.patch('/:chatId', async (req, res) => {
+    const { chatId } = req.params;
+    const { userId } = req.body;
+    try {
+        const messageCount = await getUpdatedMessageCount(chatId, 'U0001');
+        const [result] = await client.execute(
+            'UPDATE chat_board SET message_count = ? WHERE chat_id = ? AND user_id = ?', 
+            [messageCount, chatId, 'U0001']
+        );
+
+        if (result.affectedRows > 0) {
+            res.json({ message: 'Message count updated successfully', messageCount: messageCount });
+        } else {
+            res.status(404).json({ message: 'Chat not found or update failed'});
+        }
+    } catch (err) {
+        console.error('Error updating message count:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 app.get('/', async(req, res) => {
     try {
         const [boards] = await client.execute('SELECT * FROM chat_board'); // user_id will be added
@@ -171,19 +207,32 @@ app.get('/', async(req, res) => {
 
 app.get('/:chatId', async (req, res) => {
     const { chatId } = req.params;
+    const { lastMessage } = req.query;
     try {
-        const [bubbles] = await client.execute('SELECT * FROM chat_bubble WHERE chat_id = ?', [chatId]); // user_id will be added
-        if (bubbles.length > 0) {
-            res.json({ 
-                messages: bubbles
-            });
-        } else if (chatId == 0) {
-            res.json({ 
-                messages: bubbles
-            });
+        if (lastMessage === 'true') {
+            const [lastBubble] = await client.execute('SELECT * FROM chat_bubble WHERE chat_id = ? ORDER BY bubble_id DESC LIMIT 1', [chatId]);
+            if (lastBubble.length > 0) {
+                res.json({ 
+                    messages: lastBubble
+                });
+            } else {
+                res.status(404).json({ message: 'No messages found for this chat.' });
+            }
         }
         else {
-            res.status(404).json({ message: 'Chat bubble not found.' });
+            const [bubbles] = await client.execute('SELECT * FROM chat_bubble WHERE chat_id = ?', [chatId]); // user_id will be added
+            if (bubbles.length > 0) {
+                res.json({ 
+                    messages: bubbles
+                });
+            } else if (chatId == 0) {
+                res.json({ 
+                    messages: bubbles
+                });
+            }
+            else {
+                res.status(404).json({ message: 'Chat bubble not found.' });
+            }
         }
         
     } catch (err) {
