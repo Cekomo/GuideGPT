@@ -62,6 +62,20 @@ async function getUpdatedMessageCount (chatId, userId) {
     }
 }
 
+async function getUpdatedChatCount (userId) {
+    const chatBoardQuery = 'SELECT chat_count as chatCount FROM chat_user WHERE user_id = ?';
+    
+    try {
+        const [rows] = await client.execute(chatBoardQuery, [userId]);
+        const chatCount = rows[0]?.chatCount || 0;
+        return chatCount + 1;
+    }
+    catch (error) {
+        console.error('Error message count: ', error);
+        throw error;
+    }
+}
+
 async function insertChatBoardRecord(data) {
     const lastChatBoardId = await getNextChatBoardId(data.user_id);
 
@@ -165,6 +179,24 @@ app.post('/api/gpt_response', async (req, res) => {
     }
 });
 
+app.patch('/', async (req, res) => {
+    const { userId } = req.body;
+    try {
+        const chatCount = await getUpdatedChatCount('U0001');
+        const [result] = await client.execute(
+            'UPDATE chat_user SET chat_count = ? WHERE user_id = ?', 
+            [chatCount, 'U0001']
+        );
+        if (result.affectedRows > 0) {
+            res.json({ message: 'Chat count updated successfully', chatCount: chatCount });
+        } else {
+            res.status(404).json({ message: 'Chat not found or update failed'});
+        }
+    } catch (err) {
+        console.error('Error updating chat count:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 app.patch('/:chatId', async (req, res) => {
     const { chatId } = req.params;

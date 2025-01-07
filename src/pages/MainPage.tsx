@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import './MainPage.css'
 import { ExpandableMessageBox, ChatConversation, ChatBoards } from './PageComponents'
-import { HandleSendOperation, HandleInsertChatBoard } from './ServerOperation'
+import { HandleSendOperation, HandleInsertChatBoard, updateUserChatCount } from './ServerOperation'
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import RetrieveGptRespond from './GPTController'
@@ -15,8 +15,10 @@ const MainPage: React.FC = () => {
     
     
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const [chatCount, setChatCount] = useState(0);
     const [messageCount, setMessageCount] = useState(0);
     let updatedMessageCount = 0;
+    // let updatedChatCount = 0;
     const pathSegments = location.pathname.split('/').filter(Boolean);
     const urlLastSegment = pathSegments[pathSegments.length - 1];
 
@@ -34,6 +36,8 @@ const MainPage: React.FC = () => {
 
             if (urlLastSegment == '0') {
                 chatId = await HandleInsertChatBoard('U0001', 'New Conversation');
+                const updatedChatCount = await updateUserChatCount('U0001');
+                setChatCount(updatedChatCount);
             }
             updatedMessageCount = await HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
             setMessageCount(updatedMessageCount);
@@ -57,6 +61,8 @@ const MainPage: React.FC = () => {
         if (value?.trim()) {
             if (urlLastSegment == '0') {
                 chatId = await HandleInsertChatBoard('U0001', 'New Conversation');
+                const updatedChatCount = await updateUserChatCount('U0001');
+                setChatCount(updatedChatCount);
             }
             updatedMessageCount = await HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
             setMessageCount(updatedMessageCount);
@@ -92,7 +98,7 @@ const MainPage: React.FC = () => {
                 </div>
                 <div id='chat-board'>
                     <div id='bubble-container'>
-                        {chatId && <ChatConversation chatId={chatId} messageCount={messageCount}/>}
+                        {chatId && <ChatConversation chatId={chatId} messageCount={messageCount} chatCount={chatCount}/>}
                     </div>
                     <div id='input-container'>
                         <ExpandableMessageBox

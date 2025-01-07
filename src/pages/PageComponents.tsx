@@ -51,14 +51,23 @@ interface Message {
     token_count: number;
 }
 
+interface ChatBoard {
+    user_id: string;
+    chat_id: number;
+    chat_title: string;
+    message_count: number;
+    creation_date: string;
+}
+
 interface ChatConversationProps {
     chatId: string;
     messageCount: number;
+    chatCount: number;
 }
 
-export const ChatConversation: React.FC<ChatConversationProps> = ({chatId, messageCount}) => {
+export const ChatConversation: React.FC<ChatConversationProps> = ({chatId, messageCount, chatCount}) => {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [chatBoards, setChatBoards] = useState([]);
+    const [chatBoards, setChatBoards] = useState<ChatBoard[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -85,13 +94,13 @@ export const ChatConversation: React.FC<ChatConversationProps> = ({chatId, messa
     }, [chatId]);
 
     useEffect(() => {
-        const fetchLastMessage = async () => {
+        const fetchMessageCount = async () => {
             try {
                 const response = await fetch(`http://localhost:5001/${chatId}?lastMessage=true`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch last message');
                 }
-
+                console.log(chatId);
                 const data = await response.json();
                 if (data.messages) {
                     setMessages((prevMessages) => [...prevMessages, ...data.messages]);
@@ -103,11 +112,32 @@ export const ChatConversation: React.FC<ChatConversationProps> = ({chatId, messa
             }
         };
         if (messageCount > 0) {
-            fetchLastMessage();
+            fetchMessageCount();
         }
     }, [messageCount]);
 
+    useEffect(() => {
+        const fetchChatCount = async () => {
+            try {
+                const response = await fetch(`http://localhost:5001/`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch last chat item');
+                }
 
+                const data = await response.json();
+                if (data.chatBoards ) {
+                    setChatBoards((prevBoards) => [...prevBoards, ...data.chatBoards]);
+                }
+            }
+            catch {
+                setError(error);
+                setLoading(false);
+            }
+        };
+        if (chatCount > 0) {
+            fetchChatCount();
+        }
+    }, [chatCount]);
 
     useEffect(() => {
         if (bubbleContainerRef.current) {

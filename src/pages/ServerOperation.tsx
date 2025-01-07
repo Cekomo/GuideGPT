@@ -67,9 +67,8 @@ export const HandleInsertChatBoard = async (userId: string, chatTitle: string) =
             console.error('Failed to insert data:', errorDetails);
             return null; 
         }
-
         const result = await response.json();
-        return result.chat_id; // Return the chat_id
+        return result.chat_id;  // Return the chat_id
     } catch (error) {
         console.error('Error:', error);
     }
@@ -109,6 +108,31 @@ const HandleInsertChatBubble = async (text: string, isUserInput: string, chatId:
         console.error('Error:', error);
     }
 }
+
+export const updateUserChatCount = async (userId: string) => {
+    try {
+        const response = await fetch(`http://localhost:5001/`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_id: 'U0001'
+            })
+        });
+
+        if (!response.ok) {
+            const errorDetails = await response.text();
+            console.error('Failed to update users chat count:', errorDetails);
+            return { success: false, error: errorDetails };
+        }
+        const data = await response.json();
+        return data.chatCount;
+    }
+    catch (error) {
+        console.error('Error:', error);
+    }
+}; 
 
 const updateChatBoardMessageCount = async (chatId: string) => {
     try {
