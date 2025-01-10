@@ -70,7 +70,6 @@ interface ChatBoardProps {
 
 export const ChatConversation: React.FC<ChatConversationProps> = ({chatId, messageCount}) => {
     const [messages, setMessages] = useState<Message[]>([]);
-    const [chatBoards, setChatBoards] = useState<ChatBoard[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -84,7 +83,6 @@ export const ChatConversation: React.FC<ChatConversationProps> = ({chatId, messa
                     throw new Error('Failed to fetch messages');
                 }
                 const data = await response.json();
-                setChatBoards(data.chatBoards || []);
                 setMessages(data.messages);
                 setLoading(false);
             }
@@ -177,29 +175,30 @@ export const ChatBoards : React.FC<ChatBoardProps> = ( {chatCount} ) => {
         };
 
         fetchChatBoards();
-    }, [chatCount]);
+    }, []);
 
-    // useEffect(() => {
-    //     const fetchChatCount = async () => {
-    //         try {
-    //             const response = await fetch(`http://localhost:5001/`);
-    //             if (!response.ok) {
-    //                 throw new Error('Failed to fetch last chat item');
-    //             }
-    //             const data = await response.json();
-    //             if (data.chatBoards) {
-    //                 setBoards((prevBoards) => [...data.chatBoards, ...prevBoards]);
-    //             }
-    //         }
-    //         catch {
-    //             setError(error);
-    //             setLoading(false);
-    //         }
-    //     };
-    //     if (chatCount > 0) {
-    //         fetchChatCount();
-    //     }
-    // }, [chatCount]);
+    useEffect(() => {
+        const fetchChatCount = async () => {
+            try {
+                const response = await fetch(`http://localhost:5001/`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch last chat item');
+                }
+                const data = await response.json();
+                if (data.chatBoards && data.chatBoards.length > 0) {
+                    const lastBoard = data.chatBoards[data.chatBoards.length - 1];
+                    setBoards((prevBoards) => [...prevBoards, lastBoard]);
+                }
+            }
+            catch {
+                setError(error);
+                setLoading(false);
+            }
+        };
+        if (chatCount > 0) {
+            fetchChatCount();
+        }
+    }, [chatCount]);
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error: {error}</p>;
