@@ -142,7 +142,7 @@ const updateChatBoardMessageCount = async (chatId: string) => {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                user_id: 'U0001'
+            user_id: 'U0001'
             })
         });
 

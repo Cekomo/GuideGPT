@@ -88,7 +88,7 @@ const MainPage: React.FC = () => {
             <div id='chat-container'>
                 <div id='left-panel'>
                     <div id='chat-board-list'>
-                        <ChatBoards/>
+                        <ChatBoards chatCount={chatCount}/>
                     </div>
                     <div id='control-panel'>
                         <button id='chat-adder-button' onClick={addNewChat}>
@@ -98,7 +98,7 @@ const MainPage: React.FC = () => {
                 </div>
                 <div id='chat-board'>
                     <div id='bubble-container'>
-                        {chatId && <ChatConversation chatId={chatId} messageCount={messageCount} chatCount={chatCount}/>}
+                        {chatId && <ChatConversation chatId={chatId} messageCount={messageCount} />}
                     </div>
                     <div id='input-container'>
                         <ExpandableMessageBox
