@@ -8,9 +8,6 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 function App() {
   return (
     <>
-    {/* <div id='loading-page'>
-      <LoadingScreen />
-    </div> */}
     <div id='main-page'>
       <Router>
         <Routes>
@@ -18,7 +15,6 @@ function App() {
           <Route path="/conversation/*" element={<ChatBoards />} />
         </Routes>
       </Router>
-       {/* <MainPage/> */}
     </div>
     </>
   );

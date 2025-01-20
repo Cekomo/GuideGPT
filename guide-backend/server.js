@@ -6,7 +6,8 @@ const port = 5001;
 const cors = require('cors');
 const { OpenAI } = require('openai');
 
-const openai = new OpenAI({ apiKey: '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' });
+require('dotenv').config();
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const client = mysql.createPool({
     user: 'root',
