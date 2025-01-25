@@ -136,14 +136,14 @@ app.post('/insert-chat-bubble-record', async (req, res) => {
         const lastBubbleId = await getNextBubbleId(data.chat_id);
 
         const query = `
-        INSERT INTO chat_bubble (chat_id, bubble_id, content, is_user_input, creation_date, token_count)
+        INSERT INTO chat_bubble (chat_id, bubble_id, content, message_type, creation_date, token_count)
         VALUES (?, ?, ?, ?, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'), ?);`;
         
         const values = [
             data.chat_id,
             lastBubbleId,
             data.content,
-            data.is_user_input,
+            data.message_type,
             data.creation_date,
             data.token_count
         ];

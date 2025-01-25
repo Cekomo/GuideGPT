@@ -45,8 +45,8 @@ export const ExpandableMessageBox: React.FC<ExpandableMessageBoxProps> = ({ valu
 interface Message {
     chat_id: number;
     bubble_id: number;
+    message_type: number;
     content: string;
-    is_user_input: boolean;
     creation_date: string;
     token_count: number;
 }
@@ -127,7 +127,7 @@ export const ChatConversation: React.FC<ChatConversationProps> = ({chatId, messa
 
     const renderMessages = () => {
         return messages.map((msg) => (
-            !! msg.is_user_input ? ( // Converts `1` or `0` to `true` or `false`
+            msg.message_type === 1 ? ( // Converts `1` or `0` to `true` or `false`
                 <div key={msg.bubble_id} className="text-bubble-right">
                     {msg.content}
                 </div>

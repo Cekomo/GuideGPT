@@ -20,11 +20,12 @@ CREATE TABLE chat_board (
 CREATE TABLE chat_bubble (
     chat_id INT NOT NULL,
     bubble_id INT NOT NULL,
+    message_type INT NOT NULL,
     content TEXT NOT NULL,
-    is_user_input TINYINT(1) NOT NULL,
+    content_summary TEXT default NULL,
     creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     token_count INT NOT NULL,
-    PRIMARY KEY (chat_id, bubble_id),
+    PRIMARY KEY (chat_id, bubble_id, message_type),
     FOREIGN KEY (chat_id) REFERENCES chat_board(chat_id)
 );
 

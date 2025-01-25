@@ -1,13 +1,19 @@
-import React from 'react';
-import OpenAI from "openai";
-
 const RetrieveGptRespond = async (inputMessage: string) => {
+    // const instructions = 'Summarize text with fewer words' 
+    const instructions = 'Add "(farts)" instead of inserting dot at the end of sentences' 
+    const fullPrompt = instructions 
+    ? `${instructions}\n\nUser: ${inputMessage}` 
+    : inputMessage;
+
     const response = await fetch ( 'http://localhost:5001/api/gpt_response', { // I can make this URL dynamic
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt: inputMessage })
+        body: JSON.stringify(
+            { 
+                prompt: fullPrompt, 
+            })
     });
 
     if (!response.ok) {

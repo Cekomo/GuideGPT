@@ -21,19 +21,19 @@ export const HandleSendOperation = async ({
     let updatedMessageCount = 0;
     if (trimmedValue && chatId == "0") {
         if (!gptRespond) {
-            updatedMessageCount = await HandleInsertChatBubble(trimmedValue, `1`, chatId, setMessageCount);
+            updatedMessageCount = await HandleInsertChatBubble(trimmedValue, 1, chatId, setMessageCount);
         }
         else {
-            updatedMessageCount = await HandleInsertChatBubble(trimmedValue, `0`, chatId, setMessageCount);
+            updatedMessageCount = await HandleInsertChatBubble(trimmedValue, 0, chatId, setMessageCount);
         }
         
     }
     else if (trimmedValue && chatId && chatId != "0") {
         if (gptRespond) {
-            updatedMessageCount =  await HandleInsertChatBubble(gptRespond, `0`, chatId, setMessageCount);
+            updatedMessageCount =  await HandleInsertChatBubble(gptRespond, 0, chatId, setMessageCount);
         }
         else {
-            updatedMessageCount = await HandleInsertChatBubble(trimmedValue, `1`, chatId, setMessageCount);
+            updatedMessageCount = await HandleInsertChatBubble(trimmedValue, 1, chatId, setMessageCount);
         }
     }
     // setMessageCount((prevCount) => prevCount + 1);
@@ -74,7 +74,7 @@ export const HandleInsertChatBoard = async (userId: string, chatTitle: string) =
     }
 }
 
-const HandleInsertChatBubble = async (text: string, isUserInput: string, chatId: string, setMessageCount: React.Dispatch<React.SetStateAction<number>>) =>  {
+const HandleInsertChatBubble = async (text: string, messageType: number, chatId: string, setMessageCount: React.Dispatch<React.SetStateAction<number>>) =>  {
     try {
         const currentDate = new Date().toISOString();
         const token_qty = Math.ceil(text.length / 4);
@@ -87,9 +87,9 @@ const HandleInsertChatBubble = async (text: string, isUserInput: string, chatId:
             },
             body: JSON.stringify({
                 chat_id: chatIdAsNumber,  
-                bubble_id: null,  
+                bubble_id: null,
+		        message_type: messageType,  
                 content: text,
-                is_user_input: isUserInput,
                 creation_date: currentDate,
                 token_count: token_qty
             })
