@@ -127,12 +127,12 @@ export const ChatConversation: React.FC<ChatConversationProps> = ({chatId, messa
 
     const renderMessages = () => {
         return messages.map((msg) => (
-            msg.message_type === 1 ? ( // Converts `1` or `0` to `true` or `false`
-                <div key={msg.bubble_id} className="text-bubble-right">
+            msg.message_type === 0 ? ( // Converts `1` or `0` to `true` or `false`
+                <div key={`${msg.bubble_id}-${msg.message_type}`} className="text-bubble-right">
                     {msg.content}
                 </div>
             ) : (
-                <div key={msg.bubble_id} className="text-bubble-left">
+                <div key={`${msg.bubble_id}-${msg.message_type}`} className="text-bubble-left">
                     {msg.content}
                 </div>
             )

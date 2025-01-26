@@ -1,10 +1,4 @@
 const RetrieveGptRespond = async (inputMessage: string) => {
-    // const instructions = 'Summarize text with fewer words' 
-    const instructions = 'Add "(farts)" instead of inserting dot at the end of sentences' 
-    const fullPrompt = instructions 
-    ? `${instructions}\n\nUser: ${inputMessage}` 
-    : inputMessage;
-
     const response = await fetch ( 'http://localhost:5001/api/gpt_response', { // I can make this URL dynamic
         method: 'POST',
         headers: {
@@ -12,7 +6,7 @@ const RetrieveGptRespond = async (inputMessage: string) => {
         },
         body: JSON.stringify(
             { 
-                prompt: fullPrompt, 
+                prompt: inputMessage
             })
     });
 
@@ -22,6 +16,7 @@ const RetrieveGptRespond = async (inputMessage: string) => {
     }
 
     const data = await response.json();
+    console.log(data);
     return data.completion;
 }
 

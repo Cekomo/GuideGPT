@@ -24,12 +24,17 @@ client.getConnection().catch(err => {
 app.use(express.json());
 app.use(cors());
 
-async function getNextBubbleId (chatId) {
+async function getNextBubbleId (chatId, messageType) {
     const lastBubbleQuery = 'SELECT MAX(bubble_id) as maxBubbleId FROM chat_bubble WHERE chat_id = ?';
     try {
         const [rows] = await client.execute(lastBubbleQuery, [chatId]);
         const lastBubbleId = rows[0]?.maxBubbleId || 0;
-        return lastBubbleId + 1;
+        if (messageType === 0) {
+            return lastBubbleId + 1;
+        }
+        else {
+            return lastBubbleId;
+        }
     }
     catch (error) {
         console.error('Error retrieving last bubble id: ', error);
@@ -133,20 +138,22 @@ app.post('/insert-chat-board-record', async (req, res) => {
 app.post('/insert-chat-bubble-record', async (req, res) => {
     const data = req.body;
     try {
-        const lastBubbleId = await getNextBubbleId(data.chat_id);
+        const lastBubbleId = await getNextBubbleId(data.chat_id, data.message_type);
 
         const query = `
-        INSERT INTO chat_bubble (chat_id, bubble_id, content, message_type, creation_date, token_count)
-        VALUES (?, ?, ?, ?, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'), ?);`;
+        INSERT INTO chat_bubble (chat_id, bubble_id, message_type, content, content_summary, creation_date, token_count)
+        VALUES (?, ?, ?, ?, ?, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'), ?);`;
         
         const values = [
             data.chat_id,
             lastBubbleId,
-            data.content,
             data.message_type,
+            data.content,
+            data.content_summary,
             data.creation_date,
             data.token_count
         ];
+        console.log(values);
         const result = await client.query(query, values);
         res.status(201).json( {
             message: 'Data is inserted.',
@@ -169,9 +176,11 @@ app.post('/api/gpt_response', async (req, res) => {
         const completion = await openai.chat.completions.create({
             model: "gpt-3.5-turbo-0125",
             messages: [
-                { role: "user", content: prompt } // User's input message
+                { role: "system", content: "Provide a brief summary of the user's message at the end." },
+                { role: "user", content: prompt }, // User's input message
+                // { role: "user", content: `${prompt}\n\nProvide a detailed response followed by a summary.` }
             ],
-            max_tokens: 200,
+            max_tokens: 300,
         });
         res.json({ completion: completion.choices[0]?.message.content || "No response available" });
     }

@@ -21,19 +21,19 @@ export const HandleSendOperation = async ({
     let updatedMessageCount = 0;
     if (trimmedValue && chatId == "0") {
         if (!gptRespond) {
-            updatedMessageCount = await HandleInsertChatBubble(trimmedValue, 1, chatId, setMessageCount);
+            updatedMessageCount = await HandleInsertChatBubble(trimmedValue, 0, chatId, setMessageCount);
         }
         else {
-            updatedMessageCount = await HandleInsertChatBubble(trimmedValue, 0, chatId, setMessageCount);
+            updatedMessageCount = await HandleInsertChatBubble(trimmedValue, 1, chatId, setMessageCount);
         }
         
     }
     else if (trimmedValue && chatId && chatId != "0") {
         if (gptRespond) {
-            updatedMessageCount =  await HandleInsertChatBubble(gptRespond, 0, chatId, setMessageCount);
+            updatedMessageCount =  await HandleInsertChatBubble(gptRespond, 1, chatId, setMessageCount);
         }
         else {
-            updatedMessageCount = await HandleInsertChatBubble(trimmedValue, 1, chatId, setMessageCount);
+            updatedMessageCount = await HandleInsertChatBubble(trimmedValue, 0, chatId, setMessageCount);
         }
     }
     // setMessageCount((prevCount) => prevCount + 1);
