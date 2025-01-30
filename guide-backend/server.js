@@ -24,7 +24,7 @@ client.getConnection().catch(err => {
 app.use(express.json());
 app.use(cors());
 
-async function getNextBubbleId (chatId, messageType) {
+async function getNextBubbleId (userId, chatId, messageType) {
     const lastBubbleQuery = 'SELECT MAX(bubble_id) as maxBubbleId FROM chat_bubble WHERE chat_id = ?';
     try {
         const [rows] = await client.execute(lastBubbleQuery, [chatId]);
@@ -110,13 +110,14 @@ app.post('/insert-chat-board-record', async (req, res) => {
         const lastChatBoardId = await getNextChatBoardId(data.user_id);
         
         const query = `
-        INSERT INTO chat_board (user_id, chat_id, chat_title, message_count, creation_date)
-        VALUES (?, ?, ?, ?, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'));`;
+        INSERT INTO chat_board (user_id, chat_id, chat_title, chat_summary, message_count, creation_date)
+        VALUES (?, ?, ?, ?, ?, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'));`;
 
         const values = [
             data.user_id,
             lastChatBoardId,
             data.chat_title,
+            data.chat_summary,
             data.message_count,
             data.creation_date
         ];
@@ -138,20 +139,20 @@ app.post('/insert-chat-board-record', async (req, res) => {
 app.post('/insert-chat-bubble-record', async (req, res) => {
     const data = req.body;
     try {
-        const lastBubbleId = await getNextBubbleId(data.chat_id, data.message_type);
+        const lastBubbleId = await getNextBubbleId('U0001', data.chat_id, data.message_type);
 
         const query = `
-        INSERT INTO chat_bubble (chat_id, bubble_id, message_type, content, content_summary, creation_date, token_count)
-        VALUES (?, ?, ?, ?, ?, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'), ?);`;
+        INSERT INTO chat_bubble (user_id, chat_id, bubble_id, message_type, content, token_count, creation_date)
+        VALUES (?, ?, ?, ?, ?, ?, STR_TO_DATE(SUBSTRING(?, 1, 19), '%Y-%m-%dT%H:%i:%s'));`;
         
         const values = [
+            'U0001',
             data.chat_id,
             lastBubbleId,
             data.message_type,
             data.content,
-            data.content_summary,
-            data.creation_date,
-            data.token_count
+            data.token_count,
+            data.creation_date            
         ];
         console.log(values);
         const result = await client.query(query, values);
@@ -173,13 +174,16 @@ app.post('/api/gpt_response', async (req, res) => {
     const { prompt } = req.body;
 
     try {
+        messages: [
+            { role: "system", content: "Provide a summary of the user's message with few words at the end. I should not change complete meaning of provided summary." },
+            { role: "user", content: prompt }, // User's input message
+            
+            // { role: "user", content: `${prompt}\n\nProvide a detailed response followed by a summary.` }
+        ]
+
         const completion = await openai.chat.completions.create({
             model: "gpt-3.5-turbo-0125",
-            messages: [
-                { role: "system", content: "Provide a brief summary of the user's message at the end." },
-                { role: "user", content: prompt }, // User's input message
-                // { role: "user", content: `${prompt}\n\nProvide a detailed response followed by a summary.` }
-            ],
+            messages: messages,
             max_tokens: 300,
         });
         res.json({ completion: completion.choices[0]?.message.content || "No response available" });

@@ -6,7 +6,12 @@ const RetrieveGptRespond = async (inputMessage: string) => {
         },
         body: JSON.stringify(
             { 
-                prompt: inputMessage
+                prompt: inputMessage,
+                previousMessages: [
+                    { role: "system", content: "Respond to the user's input. At the end, provide a concise summary of the user's question prefixed with '/nSummary:'." },
+                    { role: "user", content: "(Previous message)" },
+                    { role: "assistant", content: "(Chat message summary)" }
+                ]
             })
     });
 

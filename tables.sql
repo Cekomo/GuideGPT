@@ -12,7 +12,7 @@ CREATE TABLE chat_board (
 	user_id VARCHAR(10) NOT NULL,
     chat_id INT NOT NULL,
     chat_title VARCHAR(80) NOT NULL, 
-    chat_summary TEXT DEFAULT NULL
+    chat_summary TEXT DEFAULT NULL,
     message_count INT NOT NULL,
     creation_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (chat_id, user_id),
