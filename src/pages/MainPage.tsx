@@ -42,7 +42,7 @@ const MainPage: React.FC = () => {
             updatedMessageCount = await HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
             setMessageCount(updatedMessageCount);
             try {
-                const gptRespond = await RetrieveGptRespond(value); // Wait for the GPT response
+                const gptRespond = await RetrieveGptRespond(value, 'U0001', chatId); // Wait for the GPT response
                 updatedMessageCount = await HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef, gptRespond });
                 setMessageCount(updatedMessageCount);
             } catch (error) {
@@ -67,7 +67,7 @@ const MainPage: React.FC = () => {
             updatedMessageCount = await HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef });
             setMessageCount(updatedMessageCount);
             try {
-                const gptRespond = await RetrieveGptRespond(value); // Wait for the GPT response
+                const gptRespond = await RetrieveGptRespond(value, 'U0001', chatId); // Wait for the GPT response
                 updatedMessageCount = await HandleSendOperation({ value, chatId, setValue, setMessageCount, textareaRef, gptRespond });
                 setMessageCount(updatedMessageCount);
             } catch (error) {

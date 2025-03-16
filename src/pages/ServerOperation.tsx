@@ -159,3 +159,34 @@ const updateChatBoardMessageCount = async (chatId: string) => {
         console.error('Error:', error);
     }
 }; 
+
+interface ChatMessage {
+    role: string;
+    content: string;
+}
+
+export const getLastMessages = async (
+    userId: string,
+    chatId: string
+): Promise<ChatMessage[]> => {  
+    try {
+        const response = await fetch(`http://localhost:5001/${chatId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            const errorDetails = await response.text();
+            console.error('Failed to retrieve chat messages:', errorDetails);
+            return []; // Return empty array instead of error object
+        }
+
+        const data: ChatMessage[] = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error:', error);
+        return [];
+    }
+};

@@ -287,6 +287,24 @@ app.get('/:chatId', async (req, res) => {
     }
 });
 
+app.get('/:chatId', async (req, res) => {
+    const { chatId } = req.params;
+    try {
+        const [bubbles] = await client.execute('SELECT * FROM chat_bubble WHERE chat_id = ? AND message_type = 0 LIMIT 8', [chatId]); // user_id will be added
+        console.log(bubbles.length);
+        if (bubbles.length > 0) {
+            res.json({ 
+                messages: bubbles
+            });
+        } else {
+            res.status(404).json({ message: 'Chat bubble not found.' });
+        }
+    } catch (err) {
+        console.error('Error fetching chat bubbles:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
 });
